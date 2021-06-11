@@ -15,7 +15,7 @@ compile:
 
 build/Makefile: | build
 	cd build \
-	&& cmake ../rocksdb/ -DFAIL_ON_WARNINGS=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo
+	&& cmake ../rocksdb/ -DFAIL_ON_WARNINGS=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLS1_QUIET=1
 
 
 build:
