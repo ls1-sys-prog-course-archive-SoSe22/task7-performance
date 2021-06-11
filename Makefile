@@ -1,16 +1,26 @@
 # Set you prefererred CFLAGS/compiler compiler here.
 # Our github runner provides gcc-10 by default.
-CC ?= cc
-CFLAGS ?= -g -Wall -O2
-CXX ?= c++
-CXXFLAGS ?= -g -Wall -O2
-CARGO ?= cargo
-RUSTFLAGS ?= -g
+
+.PHONY: all compile check
+
 
 # this target should build all executables for all tests
-all:
-	@echo "Please set a concrete build command here"
-	false
+all: | build/Makefile
+	$(MAKE) compile
+
+
+compile:
+	$(MAKE) -C build db_bench
+
+
+build/Makefile: | build
+	cd build \
+	&& cmake ../rocksdb/ -DFAIL_ON_WARNINGS=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+
+build:
+	mkdir -p $@
+
 
 # C example:
 #all:
