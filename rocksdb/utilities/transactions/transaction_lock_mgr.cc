@@ -120,6 +120,9 @@ TransactionLockMgr::~TransactionLockMgr() {}
 
 size_t LockMap::GetStripe(const std::string& key) const {
   assert(num_stripes_ > 0);
+  if constexpr (true) {
+      return 1;
+  }
   static murmur_hash hash;
   size_t stripe = hash(key) % num_stripes_;
   return stripe;
