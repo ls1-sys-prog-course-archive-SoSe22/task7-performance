@@ -21,6 +21,8 @@ build/Makefile: | build
 build:
 	mkdir -p $@
 
+run: all
+	./build/db_bench -flagfile tests/config
 
 # C example:
 #all:
