@@ -4,7 +4,8 @@
 .PHONY: all compile check
 
 NUM?=200000
-THREADS?=$(shell ./cpu.sh | grep "logical" | awk '{print $$NF}')
+#THREADS?=$(shell ./cpu.sh | grep "logical" | awk '{print $$NF}')
+THREADS?=16
 
 # this target should build all executables for all tests
 all: | build/Makefile
