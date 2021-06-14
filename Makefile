@@ -3,6 +3,7 @@
 
 .PHONY: all compile check
 
+NUM?=1000000
 
 # this target should build all executables for all tests
 all: | build/Makefile
@@ -21,8 +22,11 @@ build/Makefile: | build
 build:
 	mkdir -p $@
 
+run_small: NUM=10000
+run_small: run
+
 run: all
-	./build/db_bench -flagfile tests/config
+	./build/db_bench -flagfile tests/config --num=$(NUM)
 
 # C example:
 #all:
