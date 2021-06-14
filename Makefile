@@ -9,6 +9,10 @@ THREADS?=16
 
 # this target should build all executables for all tests
 all: | build/Makefile
+	$(MAKE) compile
+
+
+compile:
 	$(MAKE) -C build db_bench
 
 
@@ -20,24 +24,23 @@ build/Makefile: | build
 build:
 	mkdir -p $@
 
+
 run_small: NUM=10000
 run_small: run
+
+run_medium: NUM=100000
+run_medium: run
+
+run_large: NUM=1000000
+run_large: run
 
 run: all
 	./build/db_bench -flagfile tests/config --num=$(NUM) --threads=$(THREADS)
 
-# C example:
-#all:
-#	$(CC) $(CFLAGS) -o task-name task-name.c
 
-# C++ example:
-#all:
-#	$(CXX) $(CXXFLAGS) -o task-name task-name.cpp
+clean:
+	-rm -rf build
 
-# Rust example:
-#all:
-#	$(CARGO) build --release
 
-# Usually there is no need to modify this
 check: all
 	$(MAKE) -C tests check
