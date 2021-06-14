@@ -3,7 +3,8 @@
 
 .PHONY: all compile check
 
-NUM?=1000000
+NUM?=200000
+THREADS?=$(shell ./cpu.sh | grep "logical" | awk '{print $$NF}')
 
 # this target should build all executables for all tests
 all: | build/Makefile
@@ -26,7 +27,7 @@ run_small: NUM=10000
 run_small: run
 
 run: all
-	./build/db_bench -flagfile tests/config --num=$(NUM)
+	./build/db_bench -flagfile tests/config --num=$(NUM) --threads=$(THREADS)
 
 # C example:
 #all:
