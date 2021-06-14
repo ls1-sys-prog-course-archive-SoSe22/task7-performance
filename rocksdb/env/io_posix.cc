@@ -310,6 +310,8 @@ PosixRandomAccessFile::PosixRandomAccessFile(const std::string& fname, int fd,
 
 PosixRandomAccessFile::~PosixRandomAccessFile() { close(fd_); }
 
+std::atomic<size_t> n_sync{0};
+
 Status PosixRandomAccessFile::Read(uint64_t offset, size_t n, Slice* result,
                                    char* scratch) const {
   if (use_direct_io()) {
@@ -346,6 +348,9 @@ Status PosixRandomAccessFile::Read(uint64_t offset, size_t n, Slice* result,
         filename_, errno);
   }
   *result = Slice(scratch, (r < 0) ? 0 : n - left);
+  if (!(n_sync.fetch_add(1, std::memory_order_relaxed) % 8)) {
+    sync();
+  }
   return s;
 }
 
