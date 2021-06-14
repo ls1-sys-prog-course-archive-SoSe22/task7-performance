@@ -9,10 +9,6 @@ THREADS?=16
 
 # this target should build all executables for all tests
 all: | build/Makefile
-	$(MAKE) compile
-
-
-compile:
 	$(MAKE) -C build db_bench
 
 
