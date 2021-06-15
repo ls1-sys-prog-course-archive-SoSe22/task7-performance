@@ -65,3 +65,4 @@ MANIFEST
 dmypy.json
 
 tests/cache-*
+tests/optimized-run
