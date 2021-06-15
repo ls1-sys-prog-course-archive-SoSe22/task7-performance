@@ -51,7 +51,10 @@ def test(idx: int, output: bool) -> bool:
             info("You reached 0 of 40 points\n")
         return False
 
-    limit = (40 / (optimized[2] * 0.9)) * user[2]
+    offset = optimized[2] * 0.1
+    user_ops = max(0, user[2] - offset)
+    optimal_ops = optimized[2] - offset
+    limit = (40 / (optimal_ops * 0.9)) * user_ops
     if output:
         info("You reached {} of 40 points\n".format(int(min(limit, 40))))
     if limit < idx:

@@ -40,6 +40,6 @@ cache-run: cache-optimized
 
 
 check: cache-run cache-optimized
-	-python3 test.py check 40
+	-python3 test.py check 0
 	-rm cache-run
 
