@@ -28,19 +28,21 @@ build:
 run_small: NUM=10000
 run_small: run
 
+
 run_medium: NUM=100000
 run_medium: run
 
+
 run_large: NUM=1000000
 run_large: run
-
-run: all
-	./build/db_bench -flagfile tests/config --num=$(NUM) --threads=$(THREADS) | tee cache-run
 
 
 clean:
 	-rm -rf build
 
 
-check: run
-#	$(MAKE) -C tests check
+check: all
+	$(MAKE) -C .. compile
+	./build/db_bench -flagfile config --num=$(NUM) --threads=$(THREADS) | tee cache-optimized
+	../build/db_bench -flagfile config --num=$(NUM) --threads=$(THREADS) | tee cache-run
+
