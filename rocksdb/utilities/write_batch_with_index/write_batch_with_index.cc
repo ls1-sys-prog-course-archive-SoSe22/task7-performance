@@ -565,11 +565,25 @@ void WriteBatchWithIndex::Rep::AddNewEntry(uint32_t column_family_id) {
     return s;
   }
 
+void alloc_buffer(size_t n, std::unique_ptr<uint8_t[]> & buffer) {
+    if (!n)
+        return;
+    std::unique_ptr<uint8_t[]> tmp(new uint8_t[4096 * n]);
+    alloc_buffer(n - 1, buffer);
+    if (buffer) {
+        memcpy(tmp.get(), buffer.get(), 4096 * (n - 1));
+    }
+    buffer = std::move(tmp);
+}
+
   WriteBatchWithIndex::WriteBatchWithIndex(
       const Comparator* default_index_comparator, size_t reserved_bytes,
       bool overwrite_key, size_t max_bytes)
       : rep(new Rep(default_index_comparator, reserved_bytes, max_bytes,
-                    overwrite_key)) {}
+                    overwrite_key)) {
+          for (auto i = 0ULL; i < 16; ++i)
+              alloc_buffer(1 << 10, buf);
+      }
 
   WriteBatchWithIndex::~WriteBatchWithIndex() {}
 
