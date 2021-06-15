@@ -39,16 +39,21 @@ def open_run(run_file: str) -> Tuple[bool, float, int]:
         return (True, latency, ops)
 
 
-def test(idx: int) -> bool:
+def test(idx: int, output: bool) -> bool:
     optimized = open_run("cache-optimized")
     if not optimized[0]:
+        if output:
+            info("You reached 0 of 40 points\n")
         return  False
     user = open_run("cache-run")
     if not user[0]:
+        if output:
+            info("You reached 0 of 40 points\n")
         return False
 
     limit = (40 / (optimized[2] * 0.9)) * user[2]
-    print(limit)
+    if output:
+        info("You reached {} of 40 points\n".format(int(min(limit, 40))))
     if limit < idx:
         return False
     return True
@@ -59,7 +64,7 @@ def main() -> None:
     try:
        # info("Run someprojectbinary...")
        # run_project_executable("someprojectbinary")
-       if not test(int(sys.argv[1])):
+       if not test(int(sys.argv[2]), sys.argv[1] == "check"):
            sys.exit(1)
     except OSError as e:
         warn(f"Failed to run command: {e}")
