@@ -1,4 +1,46 @@
-PYTHON3 ?= python3
+# Set you prefererred CFLAGS/compiler compiler here.
+# Our github runner provides gcc-10 by default.
 
-check:
-	$(PYTHON3) ./test_something.py
+.PHONY: all compile check
+
+NUM?=200000
+#THREADS?=$(shell ./cpu.sh | grep "logical" | awk '{print $$NF}')
+THREADS?=16
+
+# this target should build all executables for all tests
+all: | build/Makefile
+	$(MAKE) compile
+
+
+compile:
+	$(MAKE) -C build db_bench
+
+
+build/Makefile: | build
+	cd build \
+	&& cmake ../rocksdb/ -DFAIL_ON_WARNINGS=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLS1_QUIET=1
+
+
+build:
+	mkdir -p $@
+
+
+run_small: NUM=10000
+run_small: run
+
+run_medium: NUM=100000
+run_medium: run
+
+run_large: NUM=1000000
+run_large: run
+
+run: all
+	./build/db_bench -flagfile tests/config --num=$(NUM) --threads=$(THREADS) | tee cache-run
+
+
+clean:
+	-rm -rf build
+
+
+check: run
+#	$(MAKE) -C tests check
