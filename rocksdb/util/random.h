@@ -10,6 +10,7 @@
 #pragma once
 #include <random>
 #include <stdint.h>
+#include <mutex>
 
 namespace rocksdb {
 
@@ -26,6 +27,7 @@ class Random {
   };
 
   uint32_t seed_;
+  std::mutex next_mutex;
 
   static uint32_t GoodSeed(uint32_t s) { return (s & M) != 0 ? (s & M) : 1; }
 
@@ -38,6 +40,7 @@ class Random {
   void Reset(uint32_t s) { seed_ = GoodSeed(s); }
 
   uint32_t Next() {
+    std::lock_guard<std::mutex> _(next_mutex);
     // We are computing
     //       seed_ = (seed_ * A) % M,    where M = 2^31-1
     //
