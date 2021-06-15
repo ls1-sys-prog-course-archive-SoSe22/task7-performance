@@ -610,6 +610,7 @@ else()
   message(STATUS "JNI library is disabled")
 endif()
 
+
 set(TESTS
         cache/cache_test.cc
         cache/lru_cache_test.cc
@@ -831,3 +832,5 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/rocksdb/"
         DESTINATION include/rocksdb)
 set(CMAKE_INSTALL_PREFIX /usr)
 endif()
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O0")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O0") 
