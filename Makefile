@@ -3,7 +3,7 @@
 
 .PHONY: all compile check
 
-NUM?=200000
+NUM?=50000
 #THREADS?=$(shell ./cpu.sh | grep "logical" | awk '{print $$NF}')
 THREADS?=16
 
@@ -28,10 +28,7 @@ build:
 run_small: NUM=10000
 run_small: run
 
-run_medium: NUM=100000
-run_medium: run
-
-run_large: NUM=1000000
+run_large: NUM=500000
 run_large: run
 
 run: all

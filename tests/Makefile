@@ -1,13 +1,8 @@
 # Set you prefererred CFLAGS/compiler compiler here.
 # Our github runner provides gcc-10 by default.
 
-.PHONY: all compile check
+.PHONY: check
 
-NUM?=200000
-#THREADS?=$(shell ./cpu.sh | grep "logical" | awk '{print $$NF}')
-THREADS?=16
-
-# this target should build all executables for all tests
 all: | build/Makefile
 	$(MAKE) compile
 
@@ -25,24 +20,26 @@ build:
 	mkdir -p $@
 
 
-run_small: NUM=10000
-run_small: run
-
-
-run_medium: NUM=100000
-run_medium: run
-
-
-run_large: NUM=1000000
-run_large: run
+optimized_run: | build/Makefile
+	$(MAKE) -C build db_bench
+	touch $@
 
 
 clean:
 	-rm -rf build
+	-rm cache-optimized
 
 
-check: all
+cache-optimized: optimized_run
+	./build/db_bench -flagfile config --num=50000 --threads=16 | tee cache-optimized
+
+
+cache-run: cache-optimized
 	$(MAKE) -C .. compile
-	./build/db_bench -flagfile config --num=$(NUM) --threads=$(THREADS) | tee cache-optimized
-	../build/db_bench -flagfile config --num=$(NUM) --threads=$(THREADS) | tee cache-run
+	../build/db_bench -flagfile config --num=50000 --threads=16 | tee cache-run
+
+
+check: cache-run cache-optimized
+	-python3 test.py check 40
+	-rm cache-run
 
