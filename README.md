@@ -1,6 +1,6 @@
 # Performance
 
-This weeks exercise requires you to optimize [RocksDB](https://rocksdb.org/). RocksDB is a high-performance persistent LSM-based key value store [pdf](https://www.cs.umb.edu/~poneil/lsmtree.pdf). We introduced changes changes to make the performance of rocksdb worse in throughput and latency.
+This weeks exercise requires you to optimize [RocksDB](https://rocksdb.org/). RocksDB is a high-performance persistent LSM-based key value store ([pdf](https://www.cs.umb.edu/~poneil/lsmtree.pdf)). We introduced changes changes to make the performance of rocksdb worse in throughput and latency.
 
 Your task is to get as close to unmodified RocksDB performance as possible with the rocksdb version in the directory `rocksdb`, by finding the changes and fixing them.
 
