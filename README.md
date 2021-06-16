@@ -31,9 +31,15 @@ The execution of the benchmark `db_bench` has to be correct and as fast as possi
    ```
    However, the final test will use `NUM=50000` and `THREADS=16`
    
+ ## Requirements
+ 1. tee
+ 2. python3
+ 3. gcc
+ 4. cmake
+ 5. gflags
+   
  ## Tips
- 
- Use the tools presented on Monday, especially [perf](http://www.brendangregg.com/perf.html) and [flamegraph](http://www.brendangregg.com/flamegraphs.html). You can either adopt the `Makefile` or copy the run command from the `Makefile` to run `db_bench` with perf.
+ You are encouraged to use [perf](http://www.brendangregg.com/perf.html) and [flamegraph](http://www.brendangregg.com/flamegraphs.html) to profile the application and identify the parts of the code that might slowdown performance. You can either adopt the `Makefile` or copy the run command from the `Makefile` to run `db_bench` with perf.
  Perf and flamegraphs also support different modes, some of them might be useful.
  
  The changes we introduced should be obvious, even if you do not know C++. Thus no major changes to the source code should be required.
