@@ -8,19 +8,19 @@
 
 #include "rocksdb/utilities/transaction_db_mutex.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class TransactionDBMutex;
 class TransactionDBCondVar;
 
 // Default implementation of TransactionDBMutexFactory.  May be overridden
 // by TransactionDBOptions.custom_mutex_factory.
 class TransactionDBMutexFactoryImpl : public TransactionDBMutexFactory {
- public:
-  std::shared_ptr<TransactionDBMutex> AllocateMutex() override;
-  std::shared_ptr<TransactionDBCondVar> AllocateCondVar() override;
+    public:
+	std::shared_ptr<TransactionDBMutex> AllocateMutex() override;
+	std::shared_ptr<TransactionDBCondVar> AllocateCondVar() override;
 };
 
-}  //  namespace rocksdb
+} //  namespace rocksdb
 
-#endif  // ROCKSDB_LITE
+#endif // ROCKSDB_LITE

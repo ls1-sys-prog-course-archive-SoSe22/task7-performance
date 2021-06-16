@@ -15,18 +15,19 @@
 #include "rocksdb/slice.h"
 #include "port/port.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 struct ComparatorJniCallbackOptions {
-  // Use adaptive mutex, which spins in the user space before resorting
-  // to kernel. This could reduce context switch when the mutex is not
-  // heavily contended. However, if the mutex is hot, we could end up
-  // wasting spin time.
-  // Default: false
-  bool use_adaptive_mutex;
+	// Use adaptive mutex, which spins in the user space before resorting
+	// to kernel. This could reduce context switch when the mutex is not
+	// heavily contended. However, if the mutex is hot, we could end up
+	// wasting spin time.
+	// Default: false
+	bool use_adaptive_mutex;
 
-  ComparatorJniCallbackOptions() : use_adaptive_mutex(false) {
-  }
+	ComparatorJniCallbackOptions() : use_adaptive_mutex(false)
+	{
+	}
 };
 
 /**
@@ -45,50 +46,47 @@ struct ComparatorJniCallbackOptions {
  * via the mutexs mtx_compare and mtx_findShortestSeparator respectively
  */
 class BaseComparatorJniCallback : public Comparator {
- public:
-    BaseComparatorJniCallback(
-      JNIEnv* env, jobject jComparator,
-      const ComparatorJniCallbackOptions* copt);
-    virtual ~BaseComparatorJniCallback();
-    virtual const char* Name() const;
-    virtual int Compare(const Slice& a, const Slice& b) const;
-    virtual void FindShortestSeparator(
-      std::string* start, const Slice& limit) const;
-    virtual void FindShortSuccessor(std::string* key) const;
+    public:
+	BaseComparatorJniCallback(JNIEnv *env, jobject jComparator,
+				  const ComparatorJniCallbackOptions *copt);
+	virtual ~BaseComparatorJniCallback();
+	virtual const char *Name() const;
+	virtual int Compare(const Slice &a, const Slice &b) const;
+	virtual void FindShortestSeparator(std::string *start,
+					   const Slice &limit) const;
+	virtual void FindShortSuccessor(std::string *key) const;
 
- private:
-    // used for synchronisation in compare method
-    port::Mutex* mtx_compare;
-    // used for synchronisation in findShortestSeparator method
-    port::Mutex* mtx_findShortestSeparator;
-    jobject m_jComparator;
-    std::string m_name;
-    jmethodID m_jCompareMethodId;
-    jmethodID m_jFindShortestSeparatorMethodId;
-    jmethodID m_jFindShortSuccessorMethodId;
+    private:
+	// used for synchronisation in compare method
+	port::Mutex *mtx_compare;
+	// used for synchronisation in findShortestSeparator method
+	port::Mutex *mtx_findShortestSeparator;
+	jobject m_jComparator;
+	std::string m_name;
+	jmethodID m_jCompareMethodId;
+	jmethodID m_jFindShortestSeparatorMethodId;
+	jmethodID m_jFindShortSuccessorMethodId;
 
- protected:
-    JavaVM* m_jvm;
-    jobject m_jSliceA;
-    jobject m_jSliceB;
-    jobject m_jSliceLimit;
+    protected:
+	JavaVM *m_jvm;
+	jobject m_jSliceA;
+	jobject m_jSliceB;
+	jobject m_jSliceLimit;
 };
 
 class ComparatorJniCallback : public BaseComparatorJniCallback {
- public:
-      ComparatorJniCallback(
-        JNIEnv* env, jobject jComparator,
-        const ComparatorJniCallbackOptions* copt);
-      ~ComparatorJniCallback();
+    public:
+	ComparatorJniCallback(JNIEnv *env, jobject jComparator,
+			      const ComparatorJniCallbackOptions *copt);
+	~ComparatorJniCallback();
 };
 
 class DirectComparatorJniCallback : public BaseComparatorJniCallback {
- public:
-      DirectComparatorJniCallback(
-        JNIEnv* env, jobject jComparator,
-        const ComparatorJniCallbackOptions* copt);
-      ~DirectComparatorJniCallback();
+    public:
+	DirectComparatorJniCallback(JNIEnv *env, jobject jComparator,
+				    const ComparatorJniCallbackOptions *copt);
+	~DirectComparatorJniCallback();
 };
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // JAVA_ROCKSJNI_COMPARATORJNICALLBACK_H_
+#endif // JAVA_ROCKSJNI_COMPARATORJNICALLBACK_H_

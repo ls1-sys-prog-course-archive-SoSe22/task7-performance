@@ -11,24 +11,25 @@
 // See ../doc/log_format.txt for more detail.
 
 #pragma once
-namespace rocksdb {
-namespace log {
-
+namespace rocksdb
+{
+namespace log
+{
 enum RecordType {
-  // Zero is reserved for preallocated files
-  kZeroType = 0,
-  kFullType = 1,
+	// Zero is reserved for preallocated files
+	kZeroType = 0,
+	kFullType = 1,
 
-  // For fragments
-  kFirstType = 2,
-  kMiddleType = 3,
-  kLastType = 4,
+	// For fragments
+	kFirstType = 2,
+	kMiddleType = 3,
+	kLastType = 4,
 
-  // For recycled log files
-  kRecyclableFullType = 5,
-  kRecyclableFirstType = 6,
-  kRecyclableMiddleType = 7,
-  kRecyclableLastType = 8,
+	// For recycled log files
+	kRecyclableFullType = 5,
+	kRecyclableFirstType = 6,
+	kRecyclableMiddleType = 7,
+	kRecyclableLastType = 8,
 };
 static const int kMaxRecordType = kRecyclableLastType;
 
@@ -41,5 +42,5 @@ static const int kHeaderSize = 4 + 2 + 1;
 // (4 bytes), length (2 bytes).
 static const int kRecyclableHeaderSize = 4 + 1 + 4 + 2;
 
-}  // namespace log
-}  // namespace rocksdb
+} // namespace log
+} // namespace rocksdb

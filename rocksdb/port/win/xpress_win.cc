@@ -25,243 +25,236 @@
 // can still build
 #include <compressapi.h>
 
-namespace rocksdb {
-namespace port {
-namespace xpress {
-
+namespace rocksdb
+{
+namespace port
+{
+namespace xpress
+{
 // Helpers
-namespace {
-
-auto CloseCompressorFun = [](void* h) {
-  if (NULL != h) {
-    ::CloseCompressor(reinterpret_cast<COMPRESSOR_HANDLE>(h));
-  }
+namespace
+{
+auto CloseCompressorFun = [](void *h) {
+	if (NULL != h) {
+		::CloseCompressor(reinterpret_cast<COMPRESSOR_HANDLE>(h));
+	}
 };
 
-auto CloseDecompressorFun = [](void* h) {
-  if (NULL != h) {
-    ::CloseDecompressor(reinterpret_cast<DECOMPRESSOR_HANDLE>(h));
-  }
+auto CloseDecompressorFun = [](void *h) {
+	if (NULL != h) {
+		::CloseDecompressor(reinterpret_cast<DECOMPRESSOR_HANDLE>(h));
+	}
 };
-
 
 #ifdef JEMALLOC
 // Make sure compressors use our jemalloc if redirected
-PVOID CompressorAlloc(PVOID, SIZE_T size) {
-  return je_malloc(size);
+PVOID CompressorAlloc(PVOID, SIZE_T size)
+{
+	return je_malloc(size);
 }
 
-VOID CompressorFree(PVOID, PVOID p) {
-  if (p != NULL) {
-    je_free(p);
-  }
+VOID CompressorFree(PVOID, PVOID p)
+{
+	if (p != NULL) {
+		je_free(p);
+	}
 }
 
 #endif
 
-}
+} // namespace
 
-bool Compress(const char* input, size_t length, std::string* output) {
+bool Compress(const char *input, size_t length, std::string *output)
+{
+	assert(input != nullptr);
+	assert(output != nullptr);
 
-  assert(input != nullptr);
-  assert(output != nullptr);
+	if (length == 0) {
+		output->clear();
+		return true;
+	}
 
-  if (length == 0) {
-    output->clear();
-    return true;
-  }
-
-  COMPRESS_ALLOCATION_ROUTINES* allocRoutinesPtr = nullptr;
+	COMPRESS_ALLOCATION_ROUTINES *allocRoutinesPtr = nullptr;
 
 #ifdef JEMALLOC
-  COMPRESS_ALLOCATION_ROUTINES allocationRoutines;
+	COMPRESS_ALLOCATION_ROUTINES allocationRoutines;
 
-  //  Init. allocation routines
-  allocationRoutines.Allocate = CompressorAlloc;
-  allocationRoutines.Free = CompressorFree;
-  allocationRoutines.UserContext = NULL;
+	//  Init. allocation routines
+	allocationRoutines.Allocate = CompressorAlloc;
+	allocationRoutines.Free = CompressorFree;
+	allocationRoutines.UserContext = NULL;
 
-  allocRoutinesPtr = &allocationRoutines;
+	allocRoutinesPtr = &allocationRoutines;
 #endif
 
-  COMPRESSOR_HANDLE compressor = NULL;
+	COMPRESSOR_HANDLE compressor = NULL;
 
-  BOOL success = CreateCompressor(
-    COMPRESS_ALGORITHM_XPRESS, //  Compression Algorithm
-    allocRoutinesPtr,       //  Optional allocation routine
-    &compressor);              //  Handle
+	BOOL success = CreateCompressor(
+		COMPRESS_ALGORITHM_XPRESS, //  Compression Algorithm
+		allocRoutinesPtr, //  Optional allocation routine
+		&compressor); //  Handle
 
-  if (!success) {
+	if (!success) {
 #ifdef _DEBUG
-    std::cerr << "XPRESS: Failed to create Compressor LastError: " <<
-       GetLastError() << std::endl;
+		std::cerr << "XPRESS: Failed to create Compressor LastError: "
+			  << GetLastError() << std::endl;
 #endif
-    return false;
-  }
+		return false;
+	}
 
-  std::unique_ptr<void, decltype(CloseCompressorFun)>
-     compressorGuard(compressor, CloseCompressorFun);
+	std::unique_ptr<void, decltype(CloseCompressorFun)> compressorGuard(
+		compressor, CloseCompressorFun);
 
-  SIZE_T compressedBufferSize = 0;
+	SIZE_T compressedBufferSize = 0;
 
- //  Query compressed buffer size.
-  success = ::Compress(
-    compressor,                 //  Compressor Handle
-    const_cast<char*>(input),   //  Input buffer
-    length,                     //  Uncompressed data size
-    NULL,                       //  Compressed Buffer
-    0,                          //  Compressed Buffer size
-    &compressedBufferSize);     //  Compressed Data size
+	//  Query compressed buffer size.
+	success = ::Compress(compressor, //  Compressor Handle
+			     const_cast<char *>(input), //  Input buffer
+			     length, //  Uncompressed data size
+			     NULL, //  Compressed Buffer
+			     0, //  Compressed Buffer size
+			     &compressedBufferSize); //  Compressed Data size
 
-  if (!success) {
+	if (!success) {
+		auto lastError = GetLastError();
 
-    auto lastError = GetLastError();
-
-    if (lastError != ERROR_INSUFFICIENT_BUFFER) {
+		if (lastError != ERROR_INSUFFICIENT_BUFFER) {
 #ifdef _DEBUG
-      std::cerr <<
-        "XPRESS: Failed to estimate compressed buffer size LastError " <<
-        lastError << std::endl;
+			std::cerr
+				<< "XPRESS: Failed to estimate compressed buffer size LastError "
+				<< lastError << std::endl;
 #endif
-       return false;
-     }
-  }
+			return false;
+		}
+	}
 
-  assert(compressedBufferSize > 0);
+	assert(compressedBufferSize > 0);
 
-  std::string result;
-  result.resize(compressedBufferSize);
+	std::string result;
+	result.resize(compressedBufferSize);
 
-  SIZE_T compressedDataSize = 0;
+	SIZE_T compressedDataSize = 0;
 
-  //  Compress
-  success = ::Compress(
-    compressor,                  //  Compressor Handle
-    const_cast<char*>(input),    //  Input buffer
-    length,                      //  Uncompressed data size
-    &result[0],                  //  Compressed Buffer
-    compressedBufferSize,        //  Compressed Buffer size
-    &compressedDataSize);        //  Compressed Data size
+	//  Compress
+	success = ::Compress(compressor, //  Compressor Handle
+			     const_cast<char *>(input), //  Input buffer
+			     length, //  Uncompressed data size
+			     &result[0], //  Compressed Buffer
+			     compressedBufferSize, //  Compressed Buffer size
+			     &compressedDataSize); //  Compressed Data size
 
-  if (!success) {
+	if (!success) {
 #ifdef _DEBUG
-    std::cerr << "XPRESS: Failed to compress LastError " <<
-       GetLastError() << std::endl;
+		std::cerr << "XPRESS: Failed to compress LastError "
+			  << GetLastError() << std::endl;
 #endif
-    return false;
-  }
+		return false;
+	}
 
-  result.resize(compressedDataSize);
-  output->swap(result);
+	result.resize(compressedDataSize);
+	output->swap(result);
 
-  return true;
+	return true;
 }
 
-char* Decompress(const char* input_data, size_t input_length,
-  int* decompress_size) {
+char *Decompress(const char *input_data, size_t input_length,
+		 int *decompress_size)
+{
+	assert(input_data != nullptr);
+	assert(decompress_size != nullptr);
 
-  assert(input_data != nullptr);
-  assert(decompress_size != nullptr);
+	if (input_length == 0) {
+		return nullptr;
+	}
 
-  if (input_length == 0) {
-    return nullptr;
-  }
-
-  COMPRESS_ALLOCATION_ROUTINES* allocRoutinesPtr = nullptr;
+	COMPRESS_ALLOCATION_ROUTINES *allocRoutinesPtr = nullptr;
 
 #ifdef JEMALLOC
-  COMPRESS_ALLOCATION_ROUTINES allocationRoutines;
+	COMPRESS_ALLOCATION_ROUTINES allocationRoutines;
 
-  //  Init. allocation routines
-  allocationRoutines.Allocate = CompressorAlloc;
-  allocationRoutines.Free = CompressorFree;
-  allocationRoutines.UserContext = NULL;
-  allocRoutinesPtr = &allocationRoutines;
+	//  Init. allocation routines
+	allocationRoutines.Allocate = CompressorAlloc;
+	allocationRoutines.Free = CompressorFree;
+	allocationRoutines.UserContext = NULL;
+	allocRoutinesPtr = &allocationRoutines;
 #endif
 
-  DECOMPRESSOR_HANDLE decompressor = NULL;
+	DECOMPRESSOR_HANDLE decompressor = NULL;
 
-  BOOL success = CreateDecompressor(
-    COMPRESS_ALGORITHM_XPRESS, //  Compression Algorithm
-    allocRoutinesPtr,          //  Optional allocation routine
-    &decompressor);            //  Handle
+	BOOL success = CreateDecompressor(
+		COMPRESS_ALGORITHM_XPRESS, //  Compression Algorithm
+		allocRoutinesPtr, //  Optional allocation routine
+		&decompressor); //  Handle
 
-
-  if (!success) {
+	if (!success) {
 #ifdef _DEBUG
-    std::cerr << "XPRESS: Failed to create Decompressor LastError "
-              << GetLastError() << std::endl;
+		std::cerr << "XPRESS: Failed to create Decompressor LastError "
+			  << GetLastError() << std::endl;
 #endif
-    return nullptr;
-  }
+		return nullptr;
+	}
 
-  std::unique_ptr<void, decltype(CloseDecompressorFun)>
-    compressorGuard(decompressor, CloseDecompressorFun);
+	std::unique_ptr<void, decltype(CloseDecompressorFun)> compressorGuard(
+		decompressor, CloseDecompressorFun);
 
-  SIZE_T decompressedBufferSize = 0;
+	SIZE_T decompressedBufferSize = 0;
 
-  success = ::Decompress(
-    decompressor,          //  Compressor Handle
-    const_cast<char*>(input_data),  //  Compressed data
-    input_length,               //  Compressed data size
-    NULL,                        //  Buffer set to NULL
-    0,                           //  Buffer size set to 0
-    &decompressedBufferSize);    //  Decompressed Data size
+	success = ::Decompress(
+		decompressor, //  Compressor Handle
+		const_cast<char *>(input_data), //  Compressed data
+		input_length, //  Compressed data size
+		NULL, //  Buffer set to NULL
+		0, //  Buffer size set to 0
+		&decompressedBufferSize); //  Decompressed Data size
 
-  if (!success) {
+	if (!success) {
+		auto lastError = GetLastError();
 
-    auto lastError = GetLastError();
-
-    if (lastError != ERROR_INSUFFICIENT_BUFFER) {
+		if (lastError != ERROR_INSUFFICIENT_BUFFER) {
 #ifdef _DEBUG
-      std::cerr
-          << "XPRESS: Failed to estimate decompressed buffer size LastError "
-          << lastError << std::endl;
+			std::cerr
+				<< "XPRESS: Failed to estimate decompressed buffer size LastError "
+				<< lastError << std::endl;
 #endif
-      return nullptr;
-    }
-  }
+			return nullptr;
+		}
+	}
 
-  assert(decompressedBufferSize > 0);
+	assert(decompressedBufferSize > 0);
 
-  // On Windows we are limited to a 32-bit int for the
-  // output data size argument
-  // so we hopefully never get here
-  if (decompressedBufferSize > std::numeric_limits<int>::max()) {
-    assert(false);
-    return nullptr;
-  }
+	// On Windows we are limited to a 32-bit int for the
+	// output data size argument
+	// so we hopefully never get here
+	if (decompressedBufferSize > std::numeric_limits<int>::max()) {
+		assert(false);
+		return nullptr;
+	}
 
-  // The callers are deallocating using delete[]
-  // thus we must allocate with new[]
-  std::unique_ptr<char[]> outputBuffer(new char[decompressedBufferSize]);
+	// The callers are deallocating using delete[]
+	// thus we must allocate with new[]
+	std::unique_ptr<char[]> outputBuffer(new char[decompressedBufferSize]);
 
-  SIZE_T decompressedDataSize = 0;
+	SIZE_T decompressedDataSize = 0;
 
-  success = ::Decompress(
-    decompressor,
-    const_cast<char*>(input_data),
-    input_length,
-    outputBuffer.get(),
-    decompressedBufferSize,
-    &decompressedDataSize);
+	success = ::Decompress(decompressor, const_cast<char *>(input_data),
+			       input_length, outputBuffer.get(),
+			       decompressedBufferSize, &decompressedDataSize);
 
-  if (!success) {
+	if (!success) {
 #ifdef _DEBUG
-    std::cerr <<
-      "XPRESS: Failed to decompress LastError " <<
-      GetLastError() << std::endl;
+		std::cerr << "XPRESS: Failed to decompress LastError "
+			  << GetLastError() << std::endl;
 #endif
-    return nullptr;
-  }
+		return nullptr;
+	}
 
-  *decompress_size = static_cast<int>(decompressedDataSize);
+	*decompress_size = static_cast<int>(decompressedDataSize);
 
-  // Return the raw buffer to the caller supporting the tradition
-  return outputBuffer.release();
+	// Return the raw buffer to the caller supporting the tradition
+	return outputBuffer.release();
 }
-}
-}
-}
+} // namespace xpress
+} // namespace port
+} // namespace rocksdb
 
 #endif

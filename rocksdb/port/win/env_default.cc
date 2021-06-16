@@ -12,9 +12,10 @@
 #include <rocksdb/env.h>
 #include "port/win/env_win.h"
 
-namespace rocksdb {
-namespace port {
-
+namespace rocksdb
+{
+namespace port
+{
 // We choose to create this on the heap and using std::once for the following
 // reasons
 // 1) Currently available MS compiler does not implement atomic C++11
@@ -25,18 +26,19 @@ namespace port {
 //    which destroys the statics (same as from DLLMain) creates a system loader
 //    dead-lock.
 //    in this manner any remaining threads are terminated OK.
-namespace {
-  std::once_flag winenv_once_flag;
-  Env* envptr;
-};
+namespace
+{
+std::once_flag winenv_once_flag;
+Env *envptr;
+}; // namespace
 
+} // namespace port
+
+Env *Env::Default()
+{
+	using namespace port;
+	std::call_once(winenv_once_flag, []() { envptr = new WinEnv(); });
+	return envptr;
 }
 
-Env* Env::Default() {
-  using namespace port;
-  std::call_once(winenv_once_flag, []() { envptr = new WinEnv(); });
-  return envptr;
-}
-
-}
-
+} // namespace rocksdb

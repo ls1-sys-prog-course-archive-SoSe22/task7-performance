@@ -12,23 +12,28 @@
 #include "util/coding.h"
 #include "util/murmurhash.h"
 
-namespace rocksdb {
-namespace stl_wrappers {
-
+namespace rocksdb
+{
+namespace stl_wrappers
+{
 struct LessOfComparator {
-  explicit LessOfComparator(const Comparator* c = BytewiseComparator())
-      : cmp(c) {}
+	explicit LessOfComparator(const Comparator *c = BytewiseComparator())
+		: cmp(c)
+	{
+	}
 
-  bool operator()(const std::string& a, const std::string& b) const {
-    return cmp->Compare(Slice(a), Slice(b)) < 0;
-  }
-  bool operator()(const Slice& a, const Slice& b) const {
-    return cmp->Compare(a, b) < 0;
-  }
+	bool operator()(const std::string &a, const std::string &b) const
+	{
+		return cmp->Compare(Slice(a), Slice(b)) < 0;
+	}
+	bool operator()(const Slice &a, const Slice &b) const
+	{
+		return cmp->Compare(a, b) < 0;
+	}
 
-  const Comparator* cmp;
+	const Comparator *cmp;
 };
 
 typedef std::map<std::string, std::string, LessOfComparator> KVMap;
-}
-}
+} // namespace stl_wrappers
+} // namespace rocksdb

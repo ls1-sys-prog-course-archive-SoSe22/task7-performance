@@ -12,7 +12,8 @@
 #include <jni.h>
 #include "rocksdb/write_batch.h"
 
-namespace rocksdb {
+namespace rocksdb
+{
 /**
  * This class acts as a bridge between C++
  * and Java. The methods in this class will be
@@ -21,28 +22,27 @@ namespace rocksdb {
  * This enables Write Batch Handlers to be implemented in Java.
  */
 class WriteBatchHandlerJniCallback : public WriteBatch::Handler {
- public:
-    WriteBatchHandlerJniCallback(
-      JNIEnv* env, jobject jWriteBackHandler);
-    ~WriteBatchHandlerJniCallback();
-    void Put(const Slice& key, const Slice& value);
-    void Merge(const Slice& key, const Slice& value);
-    void Delete(const Slice& key);
-    void DeleteRange(const Slice& beginKey, const Slice& endKey);
-    void LogData(const Slice& blob);
-    bool Continue();
+    public:
+	WriteBatchHandlerJniCallback(JNIEnv *env, jobject jWriteBackHandler);
+	~WriteBatchHandlerJniCallback();
+	void Put(const Slice &key, const Slice &value);
+	void Merge(const Slice &key, const Slice &value);
+	void Delete(const Slice &key);
+	void DeleteRange(const Slice &beginKey, const Slice &endKey);
+	void LogData(const Slice &blob);
+	bool Continue();
 
- private:
-    JNIEnv* m_env;
-    jobject m_jWriteBatchHandler;
-    jbyteArray sliceToJArray(const Slice& s);
-    jmethodID m_jPutMethodId;
-    jmethodID m_jMergeMethodId;
-    jmethodID m_jDeleteMethodId;
-    jmethodID m_jDeleteRangeMethodId;
-    jmethodID m_jLogDataMethodId;
-    jmethodID m_jContinueMethodId;
+    private:
+	JNIEnv *m_env;
+	jobject m_jWriteBatchHandler;
+	jbyteArray sliceToJArray(const Slice &s);
+	jmethodID m_jPutMethodId;
+	jmethodID m_jMergeMethodId;
+	jmethodID m_jDeleteMethodId;
+	jmethodID m_jDeleteRangeMethodId;
+	jmethodID m_jLogDataMethodId;
+	jmethodID m_jContinueMethodId;
 };
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // JAVA_ROCKSJNI_WRITEBATCHHANDLERJNICALLBACK_H_
+#endif // JAVA_ROCKSJNI_WRITEBATCHHANDLERJNICALLBACK_H_

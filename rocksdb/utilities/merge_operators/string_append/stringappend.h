@@ -8,24 +8,21 @@
 #include "rocksdb/merge_operator.h"
 #include "rocksdb/slice.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class StringAppendOperator : public AssociativeMergeOperator {
- public:
-  // Constructor: specify delimiter
-  explicit StringAppendOperator(char delim_char);
+    public:
+	// Constructor: specify delimiter
+	explicit StringAppendOperator(char delim_char);
 
-  virtual bool Merge(const Slice& key,
-                     const Slice* existing_value,
-                     const Slice& value,
-                     std::string* new_value,
-                     Logger* logger) const override;
+	virtual bool Merge(const Slice &key, const Slice *existing_value,
+			   const Slice &value, std::string *new_value,
+			   Logger *logger) const override;
 
-  virtual const char* Name() const override;
+	virtual const char *Name() const override;
 
- private:
-  char delim_;         // The delimiter is inserted between elements
-
+    private:
+	char delim_; // The delimiter is inserted between elements
 };
 
 } // namespace rocksdb

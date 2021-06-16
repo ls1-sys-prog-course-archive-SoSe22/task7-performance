@@ -62,8 +62,8 @@
 #include <string.h>
 #include <assert.h>
 
-namespace fbson {
-
+namespace fbson
+{
 #pragma pack(push, 1)
 
 #define FBSON_VER 1
@@ -94,38 +94,50 @@ class ObjectVal;
  * Query is through dereferencing into ObjectVal.
  */
 class FbsonDocument {
- public:
-  // create an FbsonDocument object from FBSON packed bytes
-  static FbsonDocument* createDocument(const char* pb, uint32_t size);
+    public:
+	// create an FbsonDocument object from FBSON packed bytes
+	static FbsonDocument *createDocument(const char *pb, uint32_t size);
 
-  // create an FbsonValue from FBSON packed bytes
-  static FbsonValue* createValue(const char* pb, uint32_t size);
+	// create an FbsonValue from FBSON packed bytes
+	static FbsonValue *createValue(const char *pb, uint32_t size);
 
-  uint8_t version() { return header_.ver_; }
+	uint8_t version()
+	{
+		return header_.ver_;
+	}
 
-  FbsonValue* getValue() { return ((FbsonValue*)payload_); }
+	FbsonValue *getValue()
+	{
+		return ((FbsonValue *)payload_);
+	}
 
-  ObjectVal* operator->() { return ((ObjectVal*)payload_); }
+	ObjectVal *operator->()
+	{
+		return ((ObjectVal *)payload_);
+	}
 
-  const ObjectVal* operator->() const { return ((const ObjectVal*)payload_); }
+	const ObjectVal *operator->() const
+	{
+		return ((const ObjectVal *)payload_);
+	}
 
- private:
-  /*
+    private:
+	/*
    * FbsonHeader class defines FBSON header (internal to FbsonDocument).
    *
    * Currently it only contains version information (1-byte). We may expand the
    * header to include checksum of the FBSON binary for more security.
    */
-  struct FbsonHeader {
-    uint8_t ver_;
-  } header_;
+	struct FbsonHeader {
+		uint8_t ver_;
+	} header_;
 
-  char payload_[1];
+	char payload_[1];
 
-  FbsonDocument();
+	FbsonDocument();
 
-  FbsonDocument(const FbsonDocument&) = delete;
-  FbsonDocument& operator=(const FbsonDocument&) = delete;
+	FbsonDocument(const FbsonDocument &) = delete;
+	FbsonDocument &operator=(const FbsonDocument &) = delete;
 };
 
 /*
@@ -133,59 +145,84 @@ class FbsonDocument {
  *
  * Note: it is an FORWARD iterator only due to the design of FBSON format.
  */
-template <class Iter_Type, class Cont_Type>
-class FbsonFwdIteratorT {
-  typedef Iter_Type iterator;
-  typedef typename std::iterator_traits<Iter_Type>::pointer pointer;
-  typedef typename std::iterator_traits<Iter_Type>::reference reference;
+template <class Iter_Type, class Cont_Type> class FbsonFwdIteratorT {
+	typedef Iter_Type iterator;
+	typedef typename std::iterator_traits<Iter_Type>::pointer pointer;
+	typedef typename std::iterator_traits<Iter_Type>::reference reference;
 
- public:
-  explicit FbsonFwdIteratorT(const iterator& i) : current_(i) {}
+    public:
+	explicit FbsonFwdIteratorT(const iterator &i) : current_(i)
+	{
+	}
 
-  // allow non-const to const iterator conversion (same container type)
-  template <class Iter_Ty>
-  FbsonFwdIteratorT(const FbsonFwdIteratorT<Iter_Ty, Cont_Type>& rhs)
-      : current_(rhs.base()) {}
+	// allow non-const to const iterator conversion (same container type)
+	template <class Iter_Ty>
+	FbsonFwdIteratorT(const FbsonFwdIteratorT<Iter_Ty, Cont_Type> &rhs)
+		: current_(rhs.base())
+	{
+	}
 
-  bool operator==(const FbsonFwdIteratorT& rhs) const {
-    return (current_ == rhs.current_);
-  }
+	bool operator==(const FbsonFwdIteratorT &rhs) const
+	{
+		return (current_ == rhs.current_);
+	}
 
-  bool operator!=(const FbsonFwdIteratorT& rhs) const {
-    return !operator==(rhs);
-  }
+	bool operator!=(const FbsonFwdIteratorT &rhs) const
+	{
+		return !operator==(rhs);
+	}
 
-  bool operator<(const FbsonFwdIteratorT& rhs) const {
-    return (current_ < rhs.current_);
-  }
+	bool operator<(const FbsonFwdIteratorT &rhs) const
+	{
+		return (current_ < rhs.current_);
+	}
 
-  bool operator>(const FbsonFwdIteratorT& rhs) const { return !operator<(rhs); }
+	bool operator>(const FbsonFwdIteratorT &rhs) const
+	{
+		return !operator<(rhs);
+	}
 
-  FbsonFwdIteratorT& operator++() {
-    current_ = (iterator)(((char*)current_) + current_->numPackedBytes());
-    return *this;
-  }
+	FbsonFwdIteratorT &operator++()
+	{
+		current_ = (iterator)(((char *)current_) +
+				      current_->numPackedBytes());
+		return *this;
+	}
 
-  FbsonFwdIteratorT operator++(int) {
-    auto tmp = *this;
-    current_ = (iterator)(((char*)current_) + current_->numPackedBytes());
-    return tmp;
-  }
+	FbsonFwdIteratorT operator++(int)
+	{
+		auto tmp = *this;
+		current_ = (iterator)(((char *)current_) +
+				      current_->numPackedBytes());
+		return tmp;
+	}
 
-  explicit operator pointer() { return current_; }
+	explicit operator pointer()
+	{
+		return current_;
+	}
 
-  reference operator*() const { return *current_; }
+	reference operator*() const
+	{
+		return *current_;
+	}
 
-  pointer operator->() const { return current_; }
+	pointer operator->() const
+	{
+		return current_;
+	}
 
-  iterator base() const { return current_; }
+	iterator base() const
+	{
+		return current_;
+	}
 
- private:
-  iterator current_;
+    private:
+	iterator current_;
 };
 
-typedef int (*hDictInsert)(const char* key, unsigned len);
-typedef int (*hDictFind)(const char* key, unsigned len);
+typedef int (*hDictInsert)(const char *key, unsigned len);
+typedef int (*hDictFind)(const char *key, unsigned len);
 
 /*
  * FbsonType defines 10 primitive types and 2 container types, as described
@@ -208,19 +245,19 @@ typedef int (*hDictFind)(const char* key, unsigned len);
  * | 0x0B int32 value_list     //array, int32 is the total bytes of the array
  */
 enum class FbsonType : char {
-  T_Null = 0x00,
-  T_True = 0x01,
-  T_False = 0x02,
-  T_Int8 = 0x03,
-  T_Int16 = 0x04,
-  T_Int32 = 0x05,
-  T_Int64 = 0x06,
-  T_Double = 0x07,
-  T_String = 0x08,
-  T_Binary = 0x09,
-  T_Object = 0x0A,
-  T_Array = 0x0B,
-  NUM_TYPES,
+	T_Null = 0x00,
+	T_True = 0x01,
+	T_False = 0x02,
+	T_Int8 = 0x03,
+	T_Int16 = 0x04,
+	T_Int32 = 0x05,
+	T_Int64 = 0x06,
+	T_Double = 0x07,
+	T_String = 0x08,
+	T_Binary = 0x09,
+	T_Object = 0x0A,
+	T_Array = 0x0B,
+	NUM_TYPES,
 };
 
 typedef std::underlying_type<FbsonType>::type FbsonTypeUnder;
@@ -249,46 +286,57 @@ typedef std::underlying_type<FbsonType>::type FbsonTypeUnder;
  * "USE_LARGE_DICT" to increase the dictionary size to 655535 (2-byte).
  */
 class FbsonKeyValue {
- public:
+    public:
 #ifdef USE_LARGE_DICT
-  static const int sMaxKeyId = 65535;
-  typedef uint16_t keyid_type;
+	static const int sMaxKeyId = 65535;
+	typedef uint16_t keyid_type;
 #else
-  static const int sMaxKeyId = 255;
-  typedef uint8_t keyid_type;
+	static const int sMaxKeyId = 255;
+	typedef uint8_t keyid_type;
 #endif // #ifdef USE_LARGE_DICT
 
-  static const uint8_t sMaxKeyLen = 64;
+	static const uint8_t sMaxKeyLen = 64;
 
-  // size of the key. 0 indicates it is stored as id
-  uint8_t klen() const { return size_; }
+	// size of the key. 0 indicates it is stored as id
+	uint8_t klen() const
+	{
+		return size_;
+	}
 
-  // get the key string. Note the string may not be null terminated.
-  const char* getKeyStr() const { return key_.str_; }
+	// get the key string. Note the string may not be null terminated.
+	const char *getKeyStr() const
+	{
+		return key_.str_;
+	}
 
-  keyid_type getKeyId() const { return key_.id_; }
+	keyid_type getKeyId() const
+	{
+		return key_.id_;
+	}
 
-  unsigned int keyPackedBytes() const {
-    return size_ ? (sizeof(size_) + size_)
-                 : (sizeof(size_) + sizeof(keyid_type));
-  }
+	unsigned int keyPackedBytes() const
+	{
+		return size_ ? (sizeof(size_) + size_) :
+				     (sizeof(size_) + sizeof(keyid_type));
+	}
 
-  FbsonValue* value() const {
-    return (FbsonValue*)(((char*)this) + keyPackedBytes());
-  }
+	FbsonValue *value() const
+	{
+		return (FbsonValue *)(((char *)this) + keyPackedBytes());
+	}
 
-  // size of the total packed bytes (key+value)
-  unsigned int numPackedBytes() const;
+	// size of the total packed bytes (key+value)
+	unsigned int numPackedBytes() const;
 
- private:
-  uint8_t size_;
+    private:
+	uint8_t size_;
 
-  union key_ {
-    keyid_type id_;
-    char str_[1];
-  } key_;
+	union key_ {
+		keyid_type id_;
+		char str_[1];
+	} key_;
 
-  FbsonKeyValue();
+	FbsonKeyValue();
 };
 
 /*
@@ -297,135 +345,181 @@ class FbsonKeyValue {
  * or type().
  */
 class FbsonValue {
- public:
-  static const uint32_t sMaxValueLen = 1 << 24; // 16M
+    public:
+	static const uint32_t sMaxValueLen = 1 << 24; // 16M
 
-  bool isNull() const { return (type_ == FbsonType::T_Null); }
-  bool isTrue() const { return (type_ == FbsonType::T_True); }
-  bool isFalse() const { return (type_ == FbsonType::T_False); }
-  bool isInt8() const { return (type_ == FbsonType::T_Int8); }
-  bool isInt16() const { return (type_ == FbsonType::T_Int16); }
-  bool isInt32() const { return (type_ == FbsonType::T_Int32); }
-  bool isInt64() const { return (type_ == FbsonType::T_Int64); }
-  bool isDouble() const { return (type_ == FbsonType::T_Double); }
-  bool isString() const { return (type_ == FbsonType::T_String); }
-  bool isBinary() const { return (type_ == FbsonType::T_Binary); }
-  bool isObject() const { return (type_ == FbsonType::T_Object); }
-  bool isArray() const { return (type_ == FbsonType::T_Array); }
+	bool isNull() const
+	{
+		return (type_ == FbsonType::T_Null);
+	}
+	bool isTrue() const
+	{
+		return (type_ == FbsonType::T_True);
+	}
+	bool isFalse() const
+	{
+		return (type_ == FbsonType::T_False);
+	}
+	bool isInt8() const
+	{
+		return (type_ == FbsonType::T_Int8);
+	}
+	bool isInt16() const
+	{
+		return (type_ == FbsonType::T_Int16);
+	}
+	bool isInt32() const
+	{
+		return (type_ == FbsonType::T_Int32);
+	}
+	bool isInt64() const
+	{
+		return (type_ == FbsonType::T_Int64);
+	}
+	bool isDouble() const
+	{
+		return (type_ == FbsonType::T_Double);
+	}
+	bool isString() const
+	{
+		return (type_ == FbsonType::T_String);
+	}
+	bool isBinary() const
+	{
+		return (type_ == FbsonType::T_Binary);
+	}
+	bool isObject() const
+	{
+		return (type_ == FbsonType::T_Object);
+	}
+	bool isArray() const
+	{
+		return (type_ == FbsonType::T_Array);
+	}
 
-  FbsonType type() const { return type_; }
+	FbsonType type() const
+	{
+		return type_;
+	}
 
-  // size of the total packed bytes
-  unsigned int numPackedBytes() const;
+	// size of the total packed bytes
+	unsigned int numPackedBytes() const;
 
-  // size of the value in bytes
-  unsigned int size() const;
+	// size of the value in bytes
+	unsigned int size() const;
 
-  // get the raw byte array of the value
-  const char* getValuePtr() const;
+	// get the raw byte array of the value
+	const char *getValuePtr() const;
 
-  // find the FBSON value by a key path string (null terminated)
-  FbsonValue* findPath(const char* key_path,
-                       const char* delim = ".",
-                       hDictFind handler = nullptr) {
-    return findPath(key_path, (unsigned int)strlen(key_path), delim, handler);
-  }
+	// find the FBSON value by a key path string (null terminated)
+	FbsonValue *findPath(const char *key_path, const char *delim = ".",
+			     hDictFind handler = nullptr)
+	{
+		return findPath(key_path, (unsigned int)strlen(key_path), delim,
+				handler);
+	}
 
-  // find the FBSON value by a key path string (with length)
-  FbsonValue* findPath(const char* key_path,
-                       unsigned int len,
-                       const char* delim,
-                       hDictFind handler);
+	// find the FBSON value by a key path string (with length)
+	FbsonValue *findPath(const char *key_path, unsigned int len,
+			     const char *delim, hDictFind handler);
 
- protected:
-  FbsonType type_; // type info
+    protected:
+	FbsonType type_; // type info
 
-  FbsonValue();
+	FbsonValue();
 };
 
 /*
  * NumerValT is the template class (derived from FbsonValue) of all number
  * types (integers and double).
  */
-template <class T>
-class NumberValT : public FbsonValue {
- public:
-  T val() const { return num_; }
+template <class T> class NumberValT : public FbsonValue {
+    public:
+	T val() const
+	{
+		return num_;
+	}
 
-  unsigned int numPackedBytes() const { return sizeof(FbsonValue) + sizeof(T); }
+	unsigned int numPackedBytes() const
+	{
+		return sizeof(FbsonValue) + sizeof(T);
+	}
 
-  // catch all unknow specialization of the template class
-  bool setVal(T value) { return false; }
+	// catch all unknow specialization of the template class
+	bool setVal(T value)
+	{
+		return false;
+	}
 
- private:
-  T num_;
+    private:
+	T num_;
 
-  NumberValT();
+	NumberValT();
 };
 
 typedef NumberValT<int8_t> Int8Val;
 
 // override setVal for Int8Val
-template <>
-inline bool Int8Val::setVal(int8_t value) {
-  if (!isInt8()) {
-    return false;
-  }
+template <> inline bool Int8Val::setVal(int8_t value)
+{
+	if (!isInt8()) {
+		return false;
+	}
 
-  num_ = value;
-  return true;
+	num_ = value;
+	return true;
 }
 
 typedef NumberValT<int16_t> Int16Val;
 
 // override setVal for Int16Val
-template <>
-inline bool Int16Val::setVal(int16_t value) {
-  if (!isInt16()) {
-    return false;
-  }
+template <> inline bool Int16Val::setVal(int16_t value)
+{
+	if (!isInt16()) {
+		return false;
+	}
 
-  num_ = value;
-  return true;
+	num_ = value;
+	return true;
 }
 
 typedef NumberValT<int32_t> Int32Val;
 
 // override setVal for Int32Val
-template <>
-inline bool Int32Val::setVal(int32_t value) {
-  if (!isInt32()) {
-    return false;
-  }
+template <> inline bool Int32Val::setVal(int32_t value)
+{
+	if (!isInt32()) {
+		return false;
+	}
 
-  num_ = value;
-  return true;
+	num_ = value;
+	return true;
 }
 
 typedef NumberValT<int64_t> Int64Val;
 
 // override setVal for Int64Val
-template <>
-inline bool Int64Val::setVal(int64_t value) {
-  if (!isInt64()) {
-    return false;
-  }
+template <> inline bool Int64Val::setVal(int64_t value)
+{
+	if (!isInt64()) {
+		return false;
+	}
 
-  num_ = value;
-  return true;
+	num_ = value;
+	return true;
 }
 
 typedef NumberValT<double> DoubleVal;
 
 // override setVal for DoubleVal
-template <>
-inline bool DoubleVal::setVal(double value) {
-  if (!isDouble()) {
-    return false;
-  }
+template <> inline bool DoubleVal::setVal(double value)
+{
+	if (!isDouble()) {
+		return false;
+	}
 
-  num_ = value;
-  return true;
+	num_ = value;
+	return true;
 }
 
 /*
@@ -433,61 +527,70 @@ inline bool DoubleVal::setVal(double value) {
  * types. The size_ indicates the total bytes of the payload_.
  */
 class BlobVal : public FbsonValue {
- public:
-  // size of the blob payload only
-  unsigned int getBlobLen() const { return size_; }
+    public:
+	// size of the blob payload only
+	unsigned int getBlobLen() const
+	{
+		return size_;
+	}
 
-  // return the blob as byte array
-  const char* getBlob() const { return payload_; }
+	// return the blob as byte array
+	const char *getBlob() const
+	{
+		return payload_;
+	}
 
-  // size of the total packed bytes
-  unsigned int numPackedBytes() const {
-    return sizeof(FbsonValue) + sizeof(size_) + size_;
-  }
+	// size of the total packed bytes
+	unsigned int numPackedBytes() const
+	{
+		return sizeof(FbsonValue) + sizeof(size_) + size_;
+	}
 
- protected:
-  uint32_t size_;
-  char payload_[1];
+    protected:
+	uint32_t size_;
+	char payload_[1];
 
-  // set new blob bytes
-  bool internalSetVal(const char* blob, uint32_t blobSize) {
-    // if we cannot fit the new blob, fail the operation
-    if (blobSize > size_) {
-      return false;
-    }
+	// set new blob bytes
+	bool internalSetVal(const char *blob, uint32_t blobSize)
+	{
+		// if we cannot fit the new blob, fail the operation
+		if (blobSize > size_) {
+			return false;
+		}
 
-    memcpy(payload_, blob, blobSize);
+		memcpy(payload_, blob, blobSize);
 
-    // Set the reset of the bytes to 0.  Note we cannot change the size_ of the
-    // current payload, as all values are packed.
-    memset(payload_ + blobSize, 0, size_ - blobSize);
+		// Set the reset of the bytes to 0.  Note we cannot change the size_ of the
+		// current payload, as all values are packed.
+		memset(payload_ + blobSize, 0, size_ - blobSize);
 
-    return true;
-  }
+		return true;
+	}
 
-  BlobVal();
+	BlobVal();
 
- private:
-  // Disable as this class can only be allocated dynamically
-  BlobVal(const BlobVal&) = delete;
-  BlobVal& operator=(const BlobVal&) = delete;
+    private:
+	// Disable as this class can only be allocated dynamically
+	BlobVal(const BlobVal &) = delete;
+	BlobVal &operator=(const BlobVal &) = delete;
 };
 
 /*
  * Binary type
  */
 class BinaryVal : public BlobVal {
- public:
-  bool setVal(const char* blob, uint32_t blobSize) {
-    if (!isBinary()) {
-      return false;
-    }
+    public:
+	bool setVal(const char *blob, uint32_t blobSize)
+	{
+		if (!isBinary()) {
+			return false;
+		}
 
-    return internalSetVal(blob, blobSize);
-  }
+		return internalSetVal(blob, blobSize);
+	}
 
- private:
-  BinaryVal();
+    private:
+	BinaryVal();
 };
 
 /*
@@ -495,17 +598,18 @@ class BinaryVal : public BlobVal {
  * Note: FBSON string may not be a c-string (NULL-terminated)
  */
 class StringVal : public BlobVal {
- public:
-  bool setVal(const char* str, uint32_t blobSize) {
-    if (!isString()) {
-      return false;
-    }
+    public:
+	bool setVal(const char *str, uint32_t blobSize)
+	{
+		if (!isString()) {
+			return false;
+		}
 
-    return internalSetVal(str, blobSize);
-  }
+		return internalSetVal(str, blobSize);
+	}
 
- private:
-  StringVal();
+    private:
+	StringVal();
 };
 
 /*
@@ -513,377 +617,419 @@ class StringVal : public BlobVal {
  * array types. The size_ indicates the total bytes of the payload_.
  */
 class ContainerVal : public FbsonValue {
- public:
-  // size of the container payload only
-  unsigned int getContainerSize() const { return size_; }
+    public:
+	// size of the container payload only
+	unsigned int getContainerSize() const
+	{
+		return size_;
+	}
 
-  // return the container payload as byte array
-  const char* getPayload() const { return payload_; }
+	// return the container payload as byte array
+	const char *getPayload() const
+	{
+		return payload_;
+	}
 
-  // size of the total packed bytes
-  unsigned int numPackedBytes() const {
-    return sizeof(FbsonValue) + sizeof(size_) + size_;
-  }
+	// size of the total packed bytes
+	unsigned int numPackedBytes() const
+	{
+		return sizeof(FbsonValue) + sizeof(size_) + size_;
+	}
 
- protected:
-  uint32_t size_;
-  char payload_[1];
+    protected:
+	uint32_t size_;
+	char payload_[1];
 
-  ContainerVal();
+	ContainerVal();
 
-  ContainerVal(const ContainerVal&) = delete;
-  ContainerVal& operator=(const ContainerVal&) = delete;
+	ContainerVal(const ContainerVal &) = delete;
+	ContainerVal &operator=(const ContainerVal &) = delete;
 };
 
 /*
  * Object type
  */
 class ObjectVal : public ContainerVal {
- public:
-  // find the FBSON value by a key string (null terminated)
-  FbsonValue* find(const char* key, hDictFind handler = nullptr) const {
-    if (!key)
-      return nullptr;
+    public:
+	// find the FBSON value by a key string (null terminated)
+	FbsonValue *find(const char *key, hDictFind handler = nullptr) const
+	{
+		if (!key)
+			return nullptr;
 
-    return find(key, (unsigned int)strlen(key), handler);
-  }
+		return find(key, (unsigned int)strlen(key), handler);
+	}
 
-  // find the FBSON value by a key string (with length)
-  FbsonValue* find(const char* key,
-                   unsigned int klen,
-                   hDictFind handler = nullptr) const {
-    if (!key || !klen)
-      return nullptr;
+	// find the FBSON value by a key string (with length)
+	FbsonValue *find(const char *key, unsigned int klen,
+			 hDictFind handler = nullptr) const
+	{
+		if (!key || !klen)
+			return nullptr;
 
-    int key_id = -1;
-    if (handler && (key_id = handler(key, klen)) >= 0) {
-      return find(key_id);
-    }
+		int key_id = -1;
+		if (handler && (key_id = handler(key, klen)) >= 0) {
+			return find(key_id);
+		}
 
-    return internalFind(key, klen);
-  }
+		return internalFind(key, klen);
+	}
 
-  // find the FBSON value by a key dictionary ID
-  FbsonValue* find(int key_id) const {
-    if (key_id < 0 || key_id > FbsonKeyValue::sMaxKeyId)
-      return nullptr;
+	// find the FBSON value by a key dictionary ID
+	FbsonValue *find(int key_id) const
+	{
+		if (key_id < 0 || key_id > FbsonKeyValue::sMaxKeyId)
+			return nullptr;
 
-    const char* pch = payload_;
-    const char* fence = payload_ + size_;
+		const char *pch = payload_;
+		const char *fence = payload_ + size_;
 
-    while (pch < fence) {
-      FbsonKeyValue* pkey = (FbsonKeyValue*)(pch);
-      if (!pkey->klen() && key_id == pkey->getKeyId()) {
-        return pkey->value();
-      }
-      pch += pkey->numPackedBytes();
-    }
+		while (pch < fence) {
+			FbsonKeyValue *pkey = (FbsonKeyValue *)(pch);
+			if (!pkey->klen() && key_id == pkey->getKeyId()) {
+				return pkey->value();
+			}
+			pch += pkey->numPackedBytes();
+		}
 
-    assert(pch == fence);
+		assert(pch == fence);
 
-    return nullptr;
-  }
+		return nullptr;
+	}
 
-  typedef FbsonKeyValue value_type;
-  typedef value_type* pointer;
-  typedef const value_type* const_pointer;
-  typedef FbsonFwdIteratorT<pointer, ObjectVal> iterator;
-  typedef FbsonFwdIteratorT<const_pointer, ObjectVal> const_iterator;
+	typedef FbsonKeyValue value_type;
+	typedef value_type *pointer;
+	typedef const value_type *const_pointer;
+	typedef FbsonFwdIteratorT<pointer, ObjectVal> iterator;
+	typedef FbsonFwdIteratorT<const_pointer, ObjectVal> const_iterator;
 
-  iterator begin() { return iterator((pointer)payload_); }
+	iterator begin()
+	{
+		return iterator((pointer)payload_);
+	}
 
-  const_iterator begin() const { return const_iterator((pointer)payload_); }
+	const_iterator begin() const
+	{
+		return const_iterator((pointer)payload_);
+	}
 
-  iterator end() { return iterator((pointer)(payload_ + size_)); }
+	iterator end()
+	{
+		return iterator((pointer)(payload_ + size_));
+	}
 
-  const_iterator end() const {
-    return const_iterator((pointer)(payload_ + size_));
-  }
+	const_iterator end() const
+	{
+		return const_iterator((pointer)(payload_ + size_));
+	}
 
- private:
-  FbsonValue* internalFind(const char* key, unsigned int klen) const {
-    const char* pch = payload_;
-    const char* fence = payload_ + size_;
+    private:
+	FbsonValue *internalFind(const char *key, unsigned int klen) const
+	{
+		const char *pch = payload_;
+		const char *fence = payload_ + size_;
 
-    while (pch < fence) {
-      FbsonKeyValue* pkey = (FbsonKeyValue*)(pch);
-      if (klen == pkey->klen() && strncmp(key, pkey->getKeyStr(), klen) == 0) {
-        return pkey->value();
-      }
-      pch += pkey->numPackedBytes();
-    }
+		while (pch < fence) {
+			FbsonKeyValue *pkey = (FbsonKeyValue *)(pch);
+			if (klen == pkey->klen() &&
+			    strncmp(key, pkey->getKeyStr(), klen) == 0) {
+				return pkey->value();
+			}
+			pch += pkey->numPackedBytes();
+		}
 
-    assert(pch == fence);
+		assert(pch == fence);
 
-    return nullptr;
-  }
+		return nullptr;
+	}
 
- private:
-  ObjectVal();
+    private:
+	ObjectVal();
 };
 
 /*
  * Array type
  */
 class ArrayVal : public ContainerVal {
- public:
-  // get the FBSON value at index
-  FbsonValue* get(int idx) const {
-    if (idx < 0)
-      return nullptr;
+    public:
+	// get the FBSON value at index
+	FbsonValue *get(int idx) const
+	{
+		if (idx < 0)
+			return nullptr;
 
-    const char* pch = payload_;
-    const char* fence = payload_ + size_;
+		const char *pch = payload_;
+		const char *fence = payload_ + size_;
 
-    while (pch < fence && idx-- > 0)
-      pch += ((FbsonValue*)pch)->numPackedBytes();
+		while (pch < fence && idx-- > 0)
+			pch += ((FbsonValue *)pch)->numPackedBytes();
 
-    if (idx == -1)
-      return (FbsonValue*)pch;
-    else {
-      assert(pch == fence);
-      return nullptr;
-    }
-  }
+		if (idx == -1)
+			return (FbsonValue *)pch;
+		else {
+			assert(pch == fence);
+			return nullptr;
+		}
+	}
 
-  // Get number of elements in array
-  unsigned int numElem() const {
-    const char* pch = payload_;
-    const char* fence = payload_ + size_;
+	// Get number of elements in array
+	unsigned int numElem() const
+	{
+		const char *pch = payload_;
+		const char *fence = payload_ + size_;
 
-    unsigned int num = 0;
-    while (pch < fence) {
-      ++num;
-      pch += ((FbsonValue*)pch)->numPackedBytes();
-    }
+		unsigned int num = 0;
+		while (pch < fence) {
+			++num;
+			pch += ((FbsonValue *)pch)->numPackedBytes();
+		}
 
-    assert(pch == fence);
+		assert(pch == fence);
 
-    return num;
-  }
+		return num;
+	}
 
-  typedef FbsonValue value_type;
-  typedef value_type* pointer;
-  typedef const value_type* const_pointer;
-  typedef FbsonFwdIteratorT<pointer, ArrayVal> iterator;
-  typedef FbsonFwdIteratorT<const_pointer, ArrayVal> const_iterator;
+	typedef FbsonValue value_type;
+	typedef value_type *pointer;
+	typedef const value_type *const_pointer;
+	typedef FbsonFwdIteratorT<pointer, ArrayVal> iterator;
+	typedef FbsonFwdIteratorT<const_pointer, ArrayVal> const_iterator;
 
-  iterator begin() { return iterator((pointer)payload_); }
+	iterator begin()
+	{
+		return iterator((pointer)payload_);
+	}
 
-  const_iterator begin() const { return const_iterator((pointer)payload_); }
+	const_iterator begin() const
+	{
+		return const_iterator((pointer)payload_);
+	}
 
-  iterator end() { return iterator((pointer)(payload_ + size_)); }
+	iterator end()
+	{
+		return iterator((pointer)(payload_ + size_));
+	}
 
-  const_iterator end() const {
-    return const_iterator((pointer)(payload_ + size_));
-  }
+	const_iterator end() const
+	{
+		return const_iterator((pointer)(payload_ + size_));
+	}
 
- private:
-  ArrayVal();
+    private:
+	ArrayVal();
 };
 
-inline FbsonDocument* FbsonDocument::createDocument(const char* pb,
-                                                    uint32_t size) {
-  if (!pb || size < sizeof(FbsonHeader) + sizeof(FbsonValue)) {
-    return nullptr;
-  }
+inline FbsonDocument *FbsonDocument::createDocument(const char *pb,
+						    uint32_t size)
+{
+	if (!pb || size < sizeof(FbsonHeader) + sizeof(FbsonValue)) {
+		return nullptr;
+	}
 
-  FbsonDocument* doc = (FbsonDocument*)pb;
-  if (doc->header_.ver_ != FBSON_VER) {
-    return nullptr;
-  }
+	FbsonDocument *doc = (FbsonDocument *)pb;
+	if (doc->header_.ver_ != FBSON_VER) {
+		return nullptr;
+	}
 
-  FbsonValue* val = (FbsonValue*)doc->payload_;
-  if (!val->isObject() || size != sizeof(FbsonHeader) + val->numPackedBytes()) {
-    return nullptr;
-  }
+	FbsonValue *val = (FbsonValue *)doc->payload_;
+	if (!val->isObject() ||
+	    size != sizeof(FbsonHeader) + val->numPackedBytes()) {
+		return nullptr;
+	}
 
-  return doc;
+	return doc;
 }
 
-inline FbsonValue* FbsonDocument::createValue(const char* pb, uint32_t size) {
-  if (!pb || size < sizeof(FbsonHeader) + sizeof(FbsonValue)) {
-    return nullptr;
-  }
+inline FbsonValue *FbsonDocument::createValue(const char *pb, uint32_t size)
+{
+	if (!pb || size < sizeof(FbsonHeader) + sizeof(FbsonValue)) {
+		return nullptr;
+	}
 
-  FbsonDocument* doc = (FbsonDocument*)pb;
-  if (doc->header_.ver_ != FBSON_VER) {
-    return nullptr;
-  }
+	FbsonDocument *doc = (FbsonDocument *)pb;
+	if (doc->header_.ver_ != FBSON_VER) {
+		return nullptr;
+	}
 
-  FbsonValue* val = (FbsonValue*)doc->payload_;
-  if (size != sizeof(FbsonHeader) + val->numPackedBytes()) {
-    return nullptr;
-  }
+	FbsonValue *val = (FbsonValue *)doc->payload_;
+	if (size != sizeof(FbsonHeader) + val->numPackedBytes()) {
+		return nullptr;
+	}
 
-  return val;
+	return val;
 }
 
-inline unsigned int FbsonKeyValue::numPackedBytes() const {
-  unsigned int ks = keyPackedBytes();
-  FbsonValue* val = (FbsonValue*)(((char*)this) + ks);
-  return ks + val->numPackedBytes();
+inline unsigned int FbsonKeyValue::numPackedBytes() const
+{
+	unsigned int ks = keyPackedBytes();
+	FbsonValue *val = (FbsonValue *)(((char *)this) + ks);
+	return ks + val->numPackedBytes();
 }
 
 // Poor man's "virtual" function FbsonValue::numPackedBytes
-inline unsigned int FbsonValue::numPackedBytes() const {
-  switch (type_) {
-  case FbsonType::T_Null:
-  case FbsonType::T_True:
-  case FbsonType::T_False: {
-    return sizeof(type_);
-  }
+inline unsigned int FbsonValue::numPackedBytes() const
+{
+	switch (type_) {
+	case FbsonType::T_Null:
+	case FbsonType::T_True:
+	case FbsonType::T_False: {
+		return sizeof(type_);
+	}
 
-  case FbsonType::T_Int8: {
-    return sizeof(type_) + sizeof(int8_t);
-  }
-  case FbsonType::T_Int16: {
-    return sizeof(type_) + sizeof(int16_t);
-  }
-  case FbsonType::T_Int32: {
-    return sizeof(type_) + sizeof(int32_t);
-  }
-  case FbsonType::T_Int64: {
-    return sizeof(type_) + sizeof(int64_t);
-  }
-  case FbsonType::T_Double: {
-    return sizeof(type_) + sizeof(double);
-  }
-  case FbsonType::T_String:
-  case FbsonType::T_Binary: {
-    return ((BlobVal*)(this))->numPackedBytes();
-  }
+	case FbsonType::T_Int8: {
+		return sizeof(type_) + sizeof(int8_t);
+	}
+	case FbsonType::T_Int16: {
+		return sizeof(type_) + sizeof(int16_t);
+	}
+	case FbsonType::T_Int32: {
+		return sizeof(type_) + sizeof(int32_t);
+	}
+	case FbsonType::T_Int64: {
+		return sizeof(type_) + sizeof(int64_t);
+	}
+	case FbsonType::T_Double: {
+		return sizeof(type_) + sizeof(double);
+	}
+	case FbsonType::T_String:
+	case FbsonType::T_Binary: {
+		return ((BlobVal *)(this))->numPackedBytes();
+	}
 
-  case FbsonType::T_Object:
-  case FbsonType::T_Array: {
-    return ((ContainerVal*)(this))->numPackedBytes();
-  }
-  default:
-    return 0;
-  }
+	case FbsonType::T_Object:
+	case FbsonType::T_Array: {
+		return ((ContainerVal *)(this))->numPackedBytes();
+	}
+	default:
+		return 0;
+	}
 }
 
-inline unsigned int FbsonValue::size() const {
-  switch (type_) {
-  case FbsonType::T_Int8: {
-    return sizeof(int8_t);
-  }
-  case FbsonType::T_Int16: {
-    return sizeof(int16_t);
-  }
-  case FbsonType::T_Int32: {
-    return sizeof(int32_t);
-  }
-  case FbsonType::T_Int64: {
-    return sizeof(int64_t);
-  }
-  case FbsonType::T_Double: {
-    return sizeof(double);
-  }
-  case FbsonType::T_String:
-  case FbsonType::T_Binary: {
-    return ((BlobVal*)(this))->getBlobLen();
-  }
+inline unsigned int FbsonValue::size() const
+{
+	switch (type_) {
+	case FbsonType::T_Int8: {
+		return sizeof(int8_t);
+	}
+	case FbsonType::T_Int16: {
+		return sizeof(int16_t);
+	}
+	case FbsonType::T_Int32: {
+		return sizeof(int32_t);
+	}
+	case FbsonType::T_Int64: {
+		return sizeof(int64_t);
+	}
+	case FbsonType::T_Double: {
+		return sizeof(double);
+	}
+	case FbsonType::T_String:
+	case FbsonType::T_Binary: {
+		return ((BlobVal *)(this))->getBlobLen();
+	}
 
-  case FbsonType::T_Object:
-  case FbsonType::T_Array: {
-    return ((ContainerVal*)(this))->getContainerSize();
-  }
-  case FbsonType::T_Null:
-  case FbsonType::T_True:
-  case FbsonType::T_False:
-  default:
-    return 0;
-  }
+	case FbsonType::T_Object:
+	case FbsonType::T_Array: {
+		return ((ContainerVal *)(this))->getContainerSize();
+	}
+	case FbsonType::T_Null:
+	case FbsonType::T_True:
+	case FbsonType::T_False:
+	default:
+		return 0;
+	}
 }
 
-inline const char* FbsonValue::getValuePtr() const {
-  switch (type_) {
-  case FbsonType::T_Int8:
-  case FbsonType::T_Int16:
-  case FbsonType::T_Int32:
-  case FbsonType::T_Int64:
-  case FbsonType::T_Double:
-    return ((char*)this) + sizeof(FbsonType);
+inline const char *FbsonValue::getValuePtr() const
+{
+	switch (type_) {
+	case FbsonType::T_Int8:
+	case FbsonType::T_Int16:
+	case FbsonType::T_Int32:
+	case FbsonType::T_Int64:
+	case FbsonType::T_Double:
+		return ((char *)this) + sizeof(FbsonType);
 
-  case FbsonType::T_String:
-  case FbsonType::T_Binary:
-    return ((BlobVal*)(this))->getBlob();
+	case FbsonType::T_String:
+	case FbsonType::T_Binary:
+		return ((BlobVal *)(this))->getBlob();
 
-  case FbsonType::T_Object:
-  case FbsonType::T_Array:
-    return ((ContainerVal*)(this))->getPayload();
+	case FbsonType::T_Object:
+	case FbsonType::T_Array:
+		return ((ContainerVal *)(this))->getPayload();
 
-  case FbsonType::T_Null:
-  case FbsonType::T_True:
-  case FbsonType::T_False:
-  default:
-    return nullptr;
-  }
+	case FbsonType::T_Null:
+	case FbsonType::T_True:
+	case FbsonType::T_False:
+	default:
+		return nullptr;
+	}
 }
 
-inline FbsonValue* FbsonValue::findPath(const char* key_path,
-                                        unsigned int kp_len,
-                                        const char* delim = ".",
-                                        hDictFind handler = nullptr) {
-  if (!key_path || !kp_len)
-    return nullptr;
+inline FbsonValue *FbsonValue::findPath(const char *key_path,
+					unsigned int kp_len,
+					const char *delim = ".",
+					hDictFind handler = nullptr)
+{
+	if (!key_path || !kp_len)
+		return nullptr;
 
-  if (!delim)
-    delim = "."; // default delimiter
+	if (!delim)
+		delim = "."; // default delimiter
 
-  FbsonValue* pval = this;
-  const char* fence = key_path + kp_len;
-  char idx_buf[21]; // buffer to parse array index (integer value)
+	FbsonValue *pval = this;
+	const char *fence = key_path + kp_len;
+	char idx_buf[21]; // buffer to parse array index (integer value)
 
-  while (pval && key_path < fence) {
-    const char* key = key_path;
-    unsigned int klen = 0;
-    // find the current key
-    for (; key_path != fence && *key_path != *delim; ++key_path, ++klen)
-      ;
+	while (pval && key_path < fence) {
+		const char *key = key_path;
+		unsigned int klen = 0;
+		// find the current key
+		for (; key_path != fence && *key_path != *delim;
+		     ++key_path, ++klen)
+			;
 
-    if (!klen)
-      return nullptr;
+		if (!klen)
+			return nullptr;
 
-    switch (pval->type_) {
-    case FbsonType::T_Object: {
-      pval = ((ObjectVal*)pval)->find(key, klen, handler);
-      break;
-    }
+		switch (pval->type_) {
+		case FbsonType::T_Object: {
+			pval = ((ObjectVal *)pval)->find(key, klen, handler);
+			break;
+		}
 
-    case FbsonType::T_Array: {
-      // parse string into an integer (array index)
-      if (klen >= sizeof(idx_buf))
-        return nullptr;
+		case FbsonType::T_Array: {
+			// parse string into an integer (array index)
+			if (klen >= sizeof(idx_buf))
+				return nullptr;
 
-      memcpy(idx_buf, key, klen);
-      idx_buf[klen] = 0;
+			memcpy(idx_buf, key, klen);
+			idx_buf[klen] = 0;
 
-      char* end = nullptr;
-      int index = (int)strtol(idx_buf, &end, 10);
-      if (end && !*end)
-        pval = ((fbson::ArrayVal*)pval)->get(index);
-      else
-        // incorrect index string
-        return nullptr;
-      break;
-    }
+			char *end = nullptr;
+			int index = (int)strtol(idx_buf, &end, 10);
+			if (end && !*end)
+				pval = ((fbson::ArrayVal *)pval)->get(index);
+			else
+				// incorrect index string
+				return nullptr;
+			break;
+		}
 
-    default:
-      return nullptr;
-    }
+		default:
+			return nullptr;
+		}
 
-    // skip the delimiter
-    if (key_path < fence) {
-      ++key_path;
-      if (key_path == fence)
-        // we have a trailing delimiter at the end
-        return nullptr;
-    }
-  }
+		// skip the delimiter
+		if (key_path < fence) {
+			++key_path;
+			if (key_path == fence)
+				// we have a trailing delimiter at the end
+				return nullptr;
+		}
+	}
 
-  return pval;
+	return pval;
 }
 
 #pragma pack(pop)

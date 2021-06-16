@@ -27,11 +27,12 @@
  * Method:    newSharedCassandraValueMergeOperator
  * Signature: ()J
  */
-jlong Java_org_rocksdb_CassandraValueMergeOperator_newSharedCassandraValueMergeOperator
-(JNIEnv* env, jclass jclazz) {
-  auto* sptr_string_append_op = new std::shared_ptr<rocksdb::MergeOperator>(
-    rocksdb::CassandraValueMergeOperator::CreateSharedInstance());
-  return reinterpret_cast<jlong>(sptr_string_append_op);
+jlong Java_org_rocksdb_CassandraValueMergeOperator_newSharedCassandraValueMergeOperator(
+	JNIEnv *env, jclass jclazz)
+{
+	auto *sptr_string_append_op = new std::shared_ptr<rocksdb::MergeOperator>(
+		rocksdb::CassandraValueMergeOperator::CreateSharedInstance());
+	return reinterpret_cast<jlong>(sptr_string_append_op);
 }
 
 /*
@@ -39,9 +40,12 @@ jlong Java_org_rocksdb_CassandraValueMergeOperator_newSharedCassandraValueMergeO
  * Method:    disposeInternal
  * Signature: (J)V
  */
-void Java_org_rocksdb_CassandraValueMergeOperator_disposeInternal(
-    JNIEnv* env, jobject jobj, jlong jhandle) {
-  auto* sptr_string_append_op =
-      reinterpret_cast<std::shared_ptr<rocksdb::MergeOperator>* >(jhandle);
-  delete sptr_string_append_op;  // delete std::shared_ptr
+void Java_org_rocksdb_CassandraValueMergeOperator_disposeInternal(JNIEnv *env,
+								  jobject jobj,
+								  jlong jhandle)
+{
+	auto *sptr_string_append_op =
+		reinterpret_cast<std::shared_ptr<rocksdb::MergeOperator> *>(
+			jhandle);
+	delete sptr_string_append_op; // delete std::shared_ptr
 }

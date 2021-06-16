@@ -7,8 +7,8 @@
 
 #include "rocksdb/types.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class DB;
 
 // Abstract handle to particular state of a DB.
@@ -18,31 +18,31 @@ class DB;
 // To Create a Snapshot, call DB::GetSnapshot().
 // To Destroy a Snapshot, call DB::ReleaseSnapshot(snapshot).
 class Snapshot {
- public:
-  // returns Snapshot's sequence number
-  virtual SequenceNumber GetSequenceNumber() const = 0;
+    public:
+	// returns Snapshot's sequence number
+	virtual SequenceNumber GetSequenceNumber() const = 0;
 
- protected:
-  virtual ~Snapshot();
+    protected:
+	virtual ~Snapshot();
 };
 
 // Simple RAII wrapper class for Snapshot.
 // Constructing this object will create a snapshot.  Destructing will
 // release the snapshot.
 class ManagedSnapshot {
- public:
-  explicit ManagedSnapshot(DB* db);
+    public:
+	explicit ManagedSnapshot(DB *db);
 
-  // Instead of creating a snapshot, take ownership of the input snapshot.
-  ManagedSnapshot(DB* db, const Snapshot* _snapshot);
+	// Instead of creating a snapshot, take ownership of the input snapshot.
+	ManagedSnapshot(DB *db, const Snapshot *_snapshot);
 
-  ~ManagedSnapshot();
+	~ManagedSnapshot();
 
-  const Snapshot* snapshot();
+	const Snapshot *snapshot();
 
- private:
-  DB* db_;
-  const Snapshot* snapshot_;
+    private:
+	DB *db_;
+	const Snapshot *snapshot_;
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

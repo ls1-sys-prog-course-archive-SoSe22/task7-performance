@@ -8,13 +8,13 @@
 
 #include <stdint.h>
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 // Define all public custom types here.
 
 // Represents a sequence number in a WAL file.
 typedef uint64_t SequenceNumber;
 
-}  //  namespace rocksdb
+} //  namespace rocksdb
 
 #endif //  STORAGE_ROCKSDB_INCLUDE_TYPES_H_

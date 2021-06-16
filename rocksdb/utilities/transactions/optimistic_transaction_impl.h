@@ -24,75 +24,82 @@
 #include "utilities/transactions/transaction_base.h"
 #include "utilities/transactions/transaction_util.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class OptimisticTransactionImpl : public TransactionBaseImpl {
- public:
-  OptimisticTransactionImpl(OptimisticTransactionDB* db,
-                            const WriteOptions& write_options,
-                            const OptimisticTransactionOptions& txn_options);
+    public:
+	OptimisticTransactionImpl(
+		OptimisticTransactionDB *db, const WriteOptions &write_options,
+		const OptimisticTransactionOptions &txn_options);
 
-  virtual ~OptimisticTransactionImpl();
+	virtual ~OptimisticTransactionImpl();
 
-  void Reinitialize(OptimisticTransactionDB* txn_db,
-                    const WriteOptions& write_options,
-                    const OptimisticTransactionOptions& txn_options);
+	void Reinitialize(OptimisticTransactionDB *txn_db,
+			  const WriteOptions &write_options,
+			  const OptimisticTransactionOptions &txn_options);
 
-  Status Prepare() override;
+	Status Prepare() override;
 
-  Status Commit() override;
+	Status Commit() override;
 
-  Status Rollback() override;
+	Status Rollback() override;
 
-  Status SetName(const TransactionName& name) override;
+	Status SetName(const TransactionName &name) override;
 
- protected:
-  Status TryLock(ColumnFamilyHandle* column_family, const Slice& key,
-                 bool read_only, bool exclusive,
-                 bool untracked = false) override;
+    protected:
+	Status TryLock(ColumnFamilyHandle *column_family, const Slice &key,
+		       bool read_only, bool exclusive,
+		       bool untracked = false) override;
 
- private:
-  OptimisticTransactionDB* const txn_db_;
+    private:
+	OptimisticTransactionDB *const txn_db_;
 
-  friend class OptimisticTransactionCallback;
+	friend class OptimisticTransactionCallback;
 
-  void Initialize(const OptimisticTransactionOptions& txn_options);
+	void Initialize(const OptimisticTransactionOptions &txn_options);
 
-  // Returns OK if it is safe to commit this transaction.  Returns Status::Busy
-  // if there are read or write conflicts that would prevent us from committing
-  // OR if we can not determine whether there would be any such conflicts.
-  //
-  // Should only be called on writer thread.
-  Status CheckTransactionForConflicts(DB* db);
+	// Returns OK if it is safe to commit this transaction.  Returns Status::Busy
+	// if there are read or write conflicts that would prevent us from committing
+	// OR if we can not determine whether there would be any such conflicts.
+	//
+	// Should only be called on writer thread.
+	Status CheckTransactionForConflicts(DB *db);
 
-  void Clear() override;
+	void Clear() override;
 
-  void UnlockGetForUpdate(ColumnFamilyHandle* column_family,
-                          const Slice& key) override {
-    // Nothing to unlock.
-  }
+	void UnlockGetForUpdate(ColumnFamilyHandle *column_family,
+				const Slice &key) override
+	{
+		// Nothing to unlock.
+	}
 
-  // No copying allowed
-  OptimisticTransactionImpl(const OptimisticTransactionImpl&);
-  void operator=(const OptimisticTransactionImpl&);
+	// No copying allowed
+	OptimisticTransactionImpl(const OptimisticTransactionImpl &);
+	void operator=(const OptimisticTransactionImpl &);
 };
 
 // Used at commit time to trigger transaction validation
 class OptimisticTransactionCallback : public WriteCallback {
- public:
-  explicit OptimisticTransactionCallback(OptimisticTransactionImpl* txn)
-      : txn_(txn) {}
+    public:
+	explicit OptimisticTransactionCallback(OptimisticTransactionImpl *txn)
+		: txn_(txn)
+	{
+	}
 
-  Status Callback(DB* db) override {
-    return txn_->CheckTransactionForConflicts(db);
-  }
+	Status Callback(DB *db) override
+	{
+		return txn_->CheckTransactionForConflicts(db);
+	}
 
-  bool AllowWriteBatching() override { return false; }
+	bool AllowWriteBatching() override
+	{
+		return false;
+	}
 
- private:
-  OptimisticTransactionImpl* txn_;
+    private:
+	OptimisticTransactionImpl *txn_;
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // ROCKSDB_LITE
+#endif // ROCKSDB_LITE

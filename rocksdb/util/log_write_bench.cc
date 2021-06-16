@@ -5,9 +5,10 @@
 
 #ifndef GFLAGS
 #include <cstdio>
-int main() {
-  fprintf(stderr, "Please install gflags to run rocksdb tools\n");
-  return 1;
+int main()
+{
+	fprintf(stderr, "Please install gflags to run rocksdb tools\n");
+	return 1;
 }
 #else
 
@@ -30,55 +31,58 @@ DEFINE_int32(record_interval, 10000, "Interval between records (microSec)");
 DEFINE_int32(bytes_per_sync, 0, "bytes_per_sync parameter in EnvOptions");
 DEFINE_bool(enable_sync, false, "sync after each write.");
 
-namespace rocksdb {
-void RunBenchmark() {
-  std::string file_name = test::TmpDir() + "/log_write_benchmark.log";
-  Env* env = Env::Default();
-  EnvOptions env_options = env->OptimizeForLogWrite(EnvOptions());
-  env_options.bytes_per_sync = FLAGS_bytes_per_sync;
-  unique_ptr<WritableFile> file;
-  env->NewWritableFile(file_name, &file, env_options);
-  unique_ptr<WritableFileWriter> writer;
-  writer.reset(new WritableFileWriter(std::move(file), env_options));
+namespace rocksdb
+{
+void RunBenchmark()
+{
+	std::string file_name = test::TmpDir() + "/log_write_benchmark.log";
+	Env *env = Env::Default();
+	EnvOptions env_options = env->OptimizeForLogWrite(EnvOptions());
+	env_options.bytes_per_sync = FLAGS_bytes_per_sync;
+	unique_ptr<WritableFile> file;
+	env->NewWritableFile(file_name, &file, env_options);
+	unique_ptr<WritableFileWriter> writer;
+	writer.reset(new WritableFileWriter(std::move(file), env_options));
 
-  std::string record;
-  record.assign(FLAGS_record_size, 'X');
+	std::string record;
+	record.assign(FLAGS_record_size, 'X');
 
-  HistogramImpl hist;
+	HistogramImpl hist;
 
-  uint64_t start_time = env->NowMicros();
-  for (int i = 0; i < FLAGS_num_records; i++) {
-    uint64_t start_nanos = env->NowNanos();
-    writer->Append(record);
-    writer->Flush();
-    if (FLAGS_enable_sync) {
-      writer->Sync(false);
-    }
-    hist.Add(env->NowNanos() - start_nanos);
+	uint64_t start_time = env->NowMicros();
+	for (int i = 0; i < FLAGS_num_records; i++) {
+		uint64_t start_nanos = env->NowNanos();
+		writer->Append(record);
+		writer->Flush();
+		if (FLAGS_enable_sync) {
+			writer->Sync(false);
+		}
+		hist.Add(env->NowNanos() - start_nanos);
 
-    if (i % 1000 == 1) {
-      fprintf(stderr, "Wrote %d records...\n", i);
-    }
+		if (i % 1000 == 1) {
+			fprintf(stderr, "Wrote %d records...\n", i);
+		}
 
-    int time_to_sleep =
-        (i + 1) * FLAGS_record_interval - (env->NowMicros() - start_time);
-    if (time_to_sleep > 0) {
-      env->SleepForMicroseconds(time_to_sleep);
-    }
-  }
+		int time_to_sleep = (i + 1) * FLAGS_record_interval -
+				    (env->NowMicros() - start_time);
+		if (time_to_sleep > 0) {
+			env->SleepForMicroseconds(time_to_sleep);
+		}
+	}
 
-  fprintf(stderr, "Distribution of latency of append+flush: \n%s",
-          hist.ToString().c_str());
+	fprintf(stderr, "Distribution of latency of append+flush: \n%s",
+		hist.ToString().c_str());
 }
-}  // namespace rocksdb
+} // namespace rocksdb
 
-int main(int argc, char** argv) {
-  SetUsageMessage(std::string("\nUSAGE:\n") + std::string(argv[0]) +
-                  " [OPTIONS]...");
-  ParseCommandLineFlags(&argc, &argv, true);
+int main(int argc, char **argv)
+{
+	SetUsageMessage(std::string("\nUSAGE:\n") + std::string(argv[0]) +
+			" [OPTIONS]...");
+	ParseCommandLineFlags(&argc, &argv, true);
 
-  rocksdb::RunBenchmark();
-  return 0;
+	rocksdb::RunBenchmark();
+	return 0;
 }
 
-#endif  // GFLAGS
+#endif // GFLAGS

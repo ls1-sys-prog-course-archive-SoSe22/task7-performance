@@ -20,97 +20,107 @@
 #include "util/string_util.h"
 #include "utilities/transactions/transaction_util.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 struct WriteOptions;
 
 OptimisticTransactionImpl::OptimisticTransactionImpl(
-    OptimisticTransactionDB* txn_db, const WriteOptions& write_options,
-    const OptimisticTransactionOptions& txn_options)
-    : TransactionBaseImpl(txn_db->GetBaseDB(), write_options), txn_db_(txn_db) {
-  Initialize(txn_options);
+	OptimisticTransactionDB *txn_db, const WriteOptions &write_options,
+	const OptimisticTransactionOptions &txn_options)
+	: TransactionBaseImpl(txn_db->GetBaseDB(), write_options),
+	  txn_db_(txn_db)
+{
+	Initialize(txn_options);
 }
 
 void OptimisticTransactionImpl::Initialize(
-    const OptimisticTransactionOptions& txn_options) {
-  if (txn_options.set_snapshot) {
-    SetSnapshot();
-  }
+	const OptimisticTransactionOptions &txn_options)
+{
+	if (txn_options.set_snapshot) {
+		SetSnapshot();
+	}
 }
 
 void OptimisticTransactionImpl::Reinitialize(
-    OptimisticTransactionDB* txn_db, const WriteOptions& write_options,
-    const OptimisticTransactionOptions& txn_options) {
-  TransactionBaseImpl::Reinitialize(txn_db->GetBaseDB(), write_options);
-  Initialize(txn_options);
+	OptimisticTransactionDB *txn_db, const WriteOptions &write_options,
+	const OptimisticTransactionOptions &txn_options)
+{
+	TransactionBaseImpl::Reinitialize(txn_db->GetBaseDB(), write_options);
+	Initialize(txn_options);
 }
 
-OptimisticTransactionImpl::~OptimisticTransactionImpl() {
+OptimisticTransactionImpl::~OptimisticTransactionImpl()
+{
 }
 
-void OptimisticTransactionImpl::Clear() {
-  TransactionBaseImpl::Clear();
+void OptimisticTransactionImpl::Clear()
+{
+	TransactionBaseImpl::Clear();
 }
 
-Status OptimisticTransactionImpl::Prepare() {
-  return Status::InvalidArgument(
-      "Two phase commit not supported for optimistic transactions.");
+Status OptimisticTransactionImpl::Prepare()
+{
+	return Status::InvalidArgument(
+		"Two phase commit not supported for optimistic transactions.");
 }
 
-Status OptimisticTransactionImpl::Commit() {
-  // Set up callback which will call CheckTransactionForConflicts() to
-  // check whether this transaction is safe to be committed.
-  OptimisticTransactionCallback callback(this);
+Status OptimisticTransactionImpl::Commit()
+{
+	// Set up callback which will call CheckTransactionForConflicts() to
+	// check whether this transaction is safe to be committed.
+	OptimisticTransactionCallback callback(this);
 
-  DBImpl* db_impl = dynamic_cast<DBImpl*>(db_->GetRootDB());
-  if (db_impl == nullptr) {
-    // This should only happen if we support creating transactions from
-    // a StackableDB and someone overrides GetRootDB().
-    return Status::InvalidArgument(
-        "DB::GetRootDB() returned an unexpected DB class");
-  }
+	DBImpl *db_impl = dynamic_cast<DBImpl *>(db_->GetRootDB());
+	if (db_impl == nullptr) {
+		// This should only happen if we support creating transactions from
+		// a StackableDB and someone overrides GetRootDB().
+		return Status::InvalidArgument(
+			"DB::GetRootDB() returned an unexpected DB class");
+	}
 
-  Status s = db_impl->WriteWithCallback(
-      write_options_, GetWriteBatch()->GetWriteBatch(), &callback);
+	Status s = db_impl->WriteWithCallback(
+		write_options_, GetWriteBatch()->GetWriteBatch(), &callback);
 
-  if (s.ok()) {
-    Clear();
-  }
+	if (s.ok()) {
+		Clear();
+	}
 
-  return s;
+	return s;
 }
 
-Status OptimisticTransactionImpl::Rollback() {
-  Clear();
-  return Status::OK();
+Status OptimisticTransactionImpl::Rollback()
+{
+	Clear();
+	return Status::OK();
 }
 
 // Record this key so that we can check it for conflicts at commit time.
 //
 // 'exclusive' is unused for OptimisticTransaction.
-Status OptimisticTransactionImpl::TryLock(ColumnFamilyHandle* column_family,
-                                          const Slice& key, bool read_only,
-                                          bool exclusive, bool untracked) {
-  if (untracked) {
-    return Status::OK();
-  }
-  uint32_t cfh_id = GetColumnFamilyID(column_family);
+Status OptimisticTransactionImpl::TryLock(ColumnFamilyHandle *column_family,
+					  const Slice &key, bool read_only,
+					  bool exclusive, bool untracked)
+{
+	if (untracked) {
+		return Status::OK();
+	}
+	uint32_t cfh_id = GetColumnFamilyID(column_family);
 
-  SetSnapshotIfNeeded();
+	SetSnapshotIfNeeded();
 
-  SequenceNumber seq;
-  if (snapshot_) {
-    seq = snapshot_->GetSequenceNumber();
-  } else {
-    seq = db_->GetLatestSequenceNumber();
-  }
+	SequenceNumber seq;
+	if (snapshot_) {
+		seq = snapshot_->GetSequenceNumber();
+	} else {
+		seq = db_->GetLatestSequenceNumber();
+	}
 
-  std::string key_str = key.ToString();
+	std::string key_str = key.ToString();
 
-  TrackKey(cfh_id, key_str, seq, read_only, exclusive);
+	TrackKey(cfh_id, key_str, seq, read_only, exclusive);
 
-  // Always return OK. Confilct checking will happen at commit time.
-  return Status::OK();
+	// Always return OK. Confilct checking will happen at commit time.
+	return Status::OK();
 }
 
 // Returns OK if it is safe to commit this transaction.  Returns Status::Busy
@@ -119,24 +129,27 @@ Status OptimisticTransactionImpl::TryLock(ColumnFamilyHandle* column_family,
 //
 // Should only be called on writer thread in order to avoid any race conditions
 // in detecting write conflicts.
-Status OptimisticTransactionImpl::CheckTransactionForConflicts(DB* db) {
-  Status result;
+Status OptimisticTransactionImpl::CheckTransactionForConflicts(DB *db)
+{
+	Status result;
 
-  assert(dynamic_cast<DBImpl*>(db) != nullptr);
-  auto db_impl = reinterpret_cast<DBImpl*>(db);
+	assert(dynamic_cast<DBImpl *>(db) != nullptr);
+	auto db_impl = reinterpret_cast<DBImpl *>(db);
 
-  // Since we are on the write thread and do not want to block other writers,
-  // we will do a cache-only conflict check.  This can result in TryAgain
-  // getting returned if there is not sufficient memtable history to check
-  // for conflicts.
-  return TransactionUtil::CheckKeysForConflicts(db_impl, GetTrackedKeys(),
-                                                true /* cache_only */);
+	// Since we are on the write thread and do not want to block other writers,
+	// we will do a cache-only conflict check.  This can result in TryAgain
+	// getting returned if there is not sufficient memtable history to check
+	// for conflicts.
+	return TransactionUtil::CheckKeysForConflicts(db_impl, GetTrackedKeys(),
+						      true /* cache_only */);
 }
 
-Status OptimisticTransactionImpl::SetName(const TransactionName& name) {
-  return Status::InvalidArgument("Optimistic transactions cannot be named.");
+Status OptimisticTransactionImpl::SetName(const TransactionName &name)
+{
+	return Status::InvalidArgument(
+		"Optimistic transactions cannot be named.");
 }
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // ROCKSDB_LITE
+#endif // ROCKSDB_LITE

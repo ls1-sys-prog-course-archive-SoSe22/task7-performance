@@ -76,83 +76,90 @@
 /**
  * Multiple Producer Single Consumer Lockless Q
  */
-template <typename T>
-class mpsc_queue_t {
- public:
-  struct buffer_node_t {
-    T data;
-    std::atomic<buffer_node_t*> next;
-  };
+template <typename T> class mpsc_queue_t {
+    public:
+	struct buffer_node_t {
+		T data;
+		std::atomic<buffer_node_t *> next;
+	};
 
-  mpsc_queue_t() {
-    buffer_node_aligned_t* al_st = new buffer_node_aligned_t;
-    buffer_node_t* node = new (al_st) buffer_node_t();
-    _head.store(node);
-    _tail.store(node);
+	mpsc_queue_t()
+	{
+		buffer_node_aligned_t *al_st = new buffer_node_aligned_t;
+		buffer_node_t *node = new (al_st) buffer_node_t();
+		_head.store(node);
+		_tail.store(node);
 
-    node->next.store(nullptr, std::memory_order_relaxed);
-  }
+		node->next.store(nullptr, std::memory_order_relaxed);
+	}
 
-  ~mpsc_queue_t() {
-    T output;
-    while (this->dequeue(&output)) {
-    }
-    buffer_node_t* front = _head.load(std::memory_order_relaxed);
-    front->~buffer_node_t();
+	~mpsc_queue_t()
+	{
+		T output;
+		while (this->dequeue(&output)) {
+		}
+		buffer_node_t *front = _head.load(std::memory_order_relaxed);
+		front->~buffer_node_t();
 
-    ::operator delete(front);
-  }
+		::operator delete(front);
+	}
 
-  void enqueue(const T& input) {
-    buffer_node_aligned_t* al_st = new buffer_node_aligned_t;
-    buffer_node_t* node = new (al_st) buffer_node_t();
+	void enqueue(const T &input)
+	{
+		buffer_node_aligned_t *al_st = new buffer_node_aligned_t;
+		buffer_node_t *node = new (al_st) buffer_node_t();
 
-    node->data = input;
-    node->next.store(nullptr, std::memory_order_relaxed);
+		node->data = input;
+		node->next.store(nullptr, std::memory_order_relaxed);
 
-    buffer_node_t* prev_head = _head.exchange(node, std::memory_order_acq_rel);
-    prev_head->next.store(node, std::memory_order_release);
-  }
+		buffer_node_t *prev_head =
+			_head.exchange(node, std::memory_order_acq_rel);
+		prev_head->next.store(node, std::memory_order_release);
+	}
 
-  bool dequeue(T* output) {
-    buffer_node_t* tail = _tail.load(std::memory_order_relaxed);
-    buffer_node_t* next = tail->next.load(std::memory_order_acquire);
+	bool dequeue(T *output)
+	{
+		buffer_node_t *tail = _tail.load(std::memory_order_relaxed);
+		buffer_node_t *next =
+			tail->next.load(std::memory_order_acquire);
 
-    if (next == nullptr) {
-      return false;
-    }
+		if (next == nullptr) {
+			return false;
+		}
 
-    *output = next->data;
-    _tail.store(next, std::memory_order_release);
+		*output = next->data;
+		_tail.store(next, std::memory_order_release);
 
-    tail->~buffer_node_t();
+		tail->~buffer_node_t();
 
-    ::operator delete(tail);
-    return true;
-  }
+		::operator delete(tail);
+		return true;
+	}
 
-  // you can only use pop_all if the queue is SPSC
-  buffer_node_t* pop_all() {
-    // nobody else can move the tail pointer.
-    buffer_node_t* tptr = _tail.load(std::memory_order_relaxed);
-    buffer_node_t* next =
-        tptr->next.exchange(nullptr, std::memory_order_acquire);
-    _head.exchange(tptr, std::memory_order_acquire);
+	// you can only use pop_all if the queue is SPSC
+	buffer_node_t *pop_all()
+	{
+		// nobody else can move the tail pointer.
+		buffer_node_t *tptr = _tail.load(std::memory_order_relaxed);
+		buffer_node_t *next =
+			tptr->next.exchange(nullptr, std::memory_order_acquire);
+		_head.exchange(tptr, std::memory_order_acquire);
 
-    // there is a race condition here
-    return next;
-  }
+		// there is a race condition here
+		return next;
+	}
 
- private:
-  typedef typename std::aligned_storage<
-      sizeof(buffer_node_t), std::alignment_of<buffer_node_t>::value>::type
-      buffer_node_aligned_t;
+    private:
+	typedef typename std::aligned_storage<
+		sizeof(buffer_node_t),
+		std::alignment_of<buffer_node_t>::value>::type
+		buffer_node_aligned_t;
 
-  std::atomic<buffer_node_t*> _head;
-  std::atomic<buffer_node_t*> _tail;
+	std::atomic<buffer_node_t *> _head;
+	std::atomic<buffer_node_t *> _tail;
 
-  mpsc_queue_t(const mpsc_queue_t&) = delete;
-  mpsc_queue_t& operator=(const mpsc_queue_t&) = delete;
+	mpsc_queue_t(const mpsc_queue_t &) = delete;
+	mpsc_queue_t &operator=(const mpsc_queue_t &) = delete;
 };
 
-#endif  // UTIL_MPSC_H_
+#endif // UTIL_MPSC_H_

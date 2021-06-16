@@ -10,22 +10,26 @@
 
 #include "rocksdb/env.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 // Prints logs to stderr for faster debugging
 class StderrLogger : public Logger {
- public:
-  explicit StderrLogger(const InfoLogLevel log_level = InfoLogLevel::INFO_LEVEL)
-      : Logger(log_level) {}
+    public:
+	explicit StderrLogger(
+		const InfoLogLevel log_level = InfoLogLevel::INFO_LEVEL)
+		: Logger(log_level)
+	{
+	}
 
-  // Brings overloaded Logv()s into scope so they're not hidden when we override
-  // a subset of them.
-  using Logger::Logv;
+	// Brings overloaded Logv()s into scope so they're not hidden when we override
+	// a subset of them.
+	using Logger::Logv;
 
-  virtual void Logv(const char* format, va_list ap) override {
-    vfprintf(stderr, format, ap);
-    fprintf(stderr, "\n");
-  }
+	virtual void Logv(const char *format, va_list ap) override
+	{
+		vfprintf(stderr, format, ap);
+		fprintf(stderr, "\n");
+	}
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

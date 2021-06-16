@@ -17,8 +17,8 @@
 #include "utilities/persistent_cache/hash_table_evictable.h"
 #include "utilities/persistent_cache/lrulist.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 //
 // Block Cache Tier Metadata
 //
@@ -38,88 +38,101 @@ namespace rocksdb {
 // This is a forward index that maps a given cache-id to a cache file object.
 // Typically you would lookup using LBA and use the object to read or write
 struct BlockInfo {
-  explicit BlockInfo(const Slice& key, const LBA& lba = LBA())
-      : key_(key.ToString()), lba_(lba) {}
+	explicit BlockInfo(const Slice &key, const LBA &lba = LBA())
+		: key_(key.ToString()), lba_(lba)
+	{
+	}
 
-  std::string key_;
-  LBA lba_;
+	std::string key_;
+	LBA lba_;
 };
 
 class BlockCacheTierMetadata {
- public:
-  explicit BlockCacheTierMetadata(const uint32_t blocks_capacity = 1024 * 1024,
-                                  const uint32_t cachefile_capacity = 10 * 1024)
-      : cache_file_index_(cachefile_capacity), block_index_(blocks_capacity) {}
+    public:
+	explicit BlockCacheTierMetadata(
+		const uint32_t blocks_capacity = 1024 * 1024,
+		const uint32_t cachefile_capacity = 10 * 1024)
+		: cache_file_index_(cachefile_capacity),
+		  block_index_(blocks_capacity)
+	{
+	}
 
-  virtual ~BlockCacheTierMetadata() {}
+	virtual ~BlockCacheTierMetadata()
+	{
+	}
 
-  // Insert a given cache file
-  bool Insert(BlockCacheFile* file);
+	// Insert a given cache file
+	bool Insert(BlockCacheFile *file);
 
-  // Lookup cache file based on cache_id
-  BlockCacheFile* Lookup(const uint32_t cache_id);
+	// Lookup cache file based on cache_id
+	BlockCacheFile *Lookup(const uint32_t cache_id);
 
-  // Insert block information to block index
-  BlockInfo* Insert(const Slice& key, const LBA& lba);
-  // bool Insert(BlockInfo* binfo);
+	// Insert block information to block index
+	BlockInfo *Insert(const Slice &key, const LBA &lba);
+	// bool Insert(BlockInfo* binfo);
 
-  // Lookup block information from block index
-  bool Lookup(const Slice& key, LBA* lba);
+	// Lookup block information from block index
+	bool Lookup(const Slice &key, LBA *lba);
 
-  // Remove a given from the block index
-  BlockInfo* Remove(const Slice& key);
+	// Remove a given from the block index
+	BlockInfo *Remove(const Slice &key);
 
-  // Find and evict a cache file using LRU policy
-  BlockCacheFile* Evict();
+	// Find and evict a cache file using LRU policy
+	BlockCacheFile *Evict();
 
-  // Clear the metadata contents
-  virtual void Clear();
+	// Clear the metadata contents
+	virtual void Clear();
 
- protected:
-  // Remove all block information from a given file
-  virtual void RemoveAllKeys(BlockCacheFile* file);
+    protected:
+	// Remove all block information from a given file
+	virtual void RemoveAllKeys(BlockCacheFile *file);
 
- private:
-  // Cache file index definition
-  //
-  // cache-id => BlockCacheFile
-  struct BlockCacheFileHash {
-    uint64_t operator()(const BlockCacheFile* rec) {
-      return std::hash<uint32_t>()(rec->cacheid());
-    }
-  };
+    private:
+	// Cache file index definition
+	//
+	// cache-id => BlockCacheFile
+	struct BlockCacheFileHash {
+		uint64_t operator()(const BlockCacheFile *rec)
+		{
+			return std::hash<uint32_t>()(rec->cacheid());
+		}
+	};
 
-  struct BlockCacheFileEqual {
-    uint64_t operator()(const BlockCacheFile* lhs, const BlockCacheFile* rhs) {
-      return lhs->cacheid() == rhs->cacheid();
-    }
-  };
+	struct BlockCacheFileEqual {
+		uint64_t operator()(const BlockCacheFile *lhs,
+				    const BlockCacheFile *rhs)
+		{
+			return lhs->cacheid() == rhs->cacheid();
+		}
+	};
 
-  typedef EvictableHashTable<BlockCacheFile, BlockCacheFileHash,
-                             BlockCacheFileEqual>
-      CacheFileIndexType;
+	typedef EvictableHashTable<BlockCacheFile, BlockCacheFileHash,
+				   BlockCacheFileEqual>
+		CacheFileIndexType;
 
-  // Block Lookup Index
-  //
-  // key => LBA
-  struct Hash {
-    size_t operator()(BlockInfo* node) const {
-      return std::hash<std::string>()(node->key_);
-    }
-  };
+	// Block Lookup Index
+	//
+	// key => LBA
+	struct Hash {
+		size_t operator()(BlockInfo *node) const
+		{
+			return std::hash<std::string>()(node->key_);
+		}
+	};
 
-  struct Equal {
-    size_t operator()(BlockInfo* lhs, BlockInfo* rhs) const {
-      return lhs->key_ == rhs->key_;
-    }
-  };
+	struct Equal {
+		size_t operator()(BlockInfo *lhs, BlockInfo *rhs) const
+		{
+			return lhs->key_ == rhs->key_;
+		}
+	};
 
-  typedef HashTable<BlockInfo*, Hash, Equal> BlockIndexType;
+	typedef HashTable<BlockInfo *, Hash, Equal> BlockIndexType;
 
-  CacheFileIndexType cache_file_index_;
-  BlockIndexType block_index_;
+	CacheFileIndexType cache_file_index_;
+	BlockIndexType block_index_;
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
 #endif

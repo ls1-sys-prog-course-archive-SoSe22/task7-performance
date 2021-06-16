@@ -10,34 +10,42 @@
 #include "rocksdb/options.h"
 #include "rocksdb/utilities/optimistic_transaction_db.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class OptimisticTransactionDBImpl : public OptimisticTransactionDB {
- public:
-  explicit OptimisticTransactionDBImpl(DB* db, bool take_ownership = true)
-      : OptimisticTransactionDB(db), db_(db), db_owner_(take_ownership) {}
+    public:
+	explicit OptimisticTransactionDBImpl(DB *db, bool take_ownership = true)
+		: OptimisticTransactionDB(db), db_(db),
+		  db_owner_(take_ownership)
+	{
+	}
 
-  ~OptimisticTransactionDBImpl() {
-    if (!db_owner_) {
-      db_.release();
-    }
-  }
+	~OptimisticTransactionDBImpl()
+	{
+		if (!db_owner_) {
+			db_.release();
+		}
+	}
 
-  Transaction* BeginTransaction(const WriteOptions& write_options,
-                                const OptimisticTransactionOptions& txn_options,
-                                Transaction* old_txn) override;
+	Transaction *
+	BeginTransaction(const WriteOptions &write_options,
+			 const OptimisticTransactionOptions &txn_options,
+			 Transaction *old_txn) override;
 
-  DB* GetBaseDB() override { return db_.get(); }
+	DB *GetBaseDB() override
+	{
+		return db_.get();
+	}
 
- private:
-  std::unique_ptr<DB> db_;
-  bool db_owner_;
+    private:
+	std::unique_ptr<DB> db_;
+	bool db_owner_;
 
-  void ReinitializeTransaction(Transaction* txn,
-                               const WriteOptions& write_options,
-                               const OptimisticTransactionOptions& txn_options =
-                                   OptimisticTransactionOptions());
+	void ReinitializeTransaction(
+		Transaction *txn, const WriteOptions &write_options,
+		const OptimisticTransactionOptions &txn_options =
+			OptimisticTransactionOptions());
 };
 
-}  //  namespace rocksdb
-#endif  // ROCKSDB_LITE
+} //  namespace rocksdb
+#endif // ROCKSDB_LITE

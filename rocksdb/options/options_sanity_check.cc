@@ -7,32 +7,35 @@
 
 #include "options/options_sanity_check.h"
 
-namespace rocksdb {
-
-namespace {
+namespace rocksdb
+{
+namespace
+{
 OptionsSanityCheckLevel SanityCheckLevelHelper(
-    const std::unordered_map<std::string, OptionsSanityCheckLevel>& smap,
-    const std::string& name) {
-  auto iter = smap.find(name);
-  return iter != smap.end() ? iter->second : kSanityLevelExactMatch;
+	const std::unordered_map<std::string, OptionsSanityCheckLevel> &smap,
+	const std::string &name)
+{
+	auto iter = smap.find(name);
+	return iter != smap.end() ? iter->second : kSanityLevelExactMatch;
 }
-}
+} // namespace
 
-OptionsSanityCheckLevel DBOptionSanityCheckLevel(
-    const std::string& option_name) {
-  return SanityCheckLevelHelper(sanity_level_db_options, option_name);
-}
-
-OptionsSanityCheckLevel CFOptionSanityCheckLevel(
-    const std::string& option_name) {
-  return SanityCheckLevelHelper(sanity_level_cf_options, option_name);
+OptionsSanityCheckLevel DBOptionSanityCheckLevel(const std::string &option_name)
+{
+	return SanityCheckLevelHelper(sanity_level_db_options, option_name);
 }
 
-OptionsSanityCheckLevel BBTOptionSanityCheckLevel(
-    const std::string& option_name) {
-  return SanityCheckLevelHelper(sanity_level_bbt_options, option_name);
+OptionsSanityCheckLevel CFOptionSanityCheckLevel(const std::string &option_name)
+{
+	return SanityCheckLevelHelper(sanity_level_cf_options, option_name);
 }
 
-}  // namespace rocksdb
+OptionsSanityCheckLevel
+BBTOptionSanityCheckLevel(const std::string &option_name)
+{
+	return SanityCheckLevelHelper(sanity_level_bbt_options, option_name);
+}
 
-#endif  // !ROCKSDB_LITE
+} // namespace rocksdb
+
+#endif // !ROCKSDB_LITE

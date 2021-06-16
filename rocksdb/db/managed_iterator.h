@@ -17,8 +17,8 @@
 #include "rocksdb/options.h"
 #include "util/arena.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class DBImpl;
 struct SuperVersion;
 class ColumnFamilyData;
@@ -33,53 +33,54 @@ class ColumnFamilyData;
  * The iterator is recreated using the saved original arguments.
  */
 class ManagedIterator : public Iterator {
- public:
-  ManagedIterator(DBImpl* db, const ReadOptions& read_options,
-                  ColumnFamilyData* cfd);
-  virtual ~ManagedIterator();
+    public:
+	ManagedIterator(DBImpl *db, const ReadOptions &read_options,
+			ColumnFamilyData *cfd);
+	virtual ~ManagedIterator();
 
-  virtual void SeekToLast() override;
-  virtual void Prev() override;
-  virtual bool Valid() const override;
-  void SeekToFirst() override;
-  virtual void Seek(const Slice& target) override;
-  virtual void SeekForPrev(const Slice& target) override;
-  virtual void Next() override;
-  virtual Slice key() const override;
-  virtual Slice value() const override;
-  virtual Status status() const override;
-  void ReleaseIter(bool only_old);
-  void SetDropOld(bool only_old) {
-    only_drop_old_ = read_options_.tailing || only_old;
-  }
+	virtual void SeekToLast() override;
+	virtual void Prev() override;
+	virtual bool Valid() const override;
+	void SeekToFirst() override;
+	virtual void Seek(const Slice &target) override;
+	virtual void SeekForPrev(const Slice &target) override;
+	virtual void Next() override;
+	virtual Slice key() const override;
+	virtual Slice value() const override;
+	virtual Status status() const override;
+	void ReleaseIter(bool only_old);
+	void SetDropOld(bool only_old)
+	{
+		only_drop_old_ = read_options_.tailing || only_old;
+	}
 
- private:
-  void RebuildIterator();
-  void UpdateCurrent();
-  void SeekInternal(const Slice& user_key, bool seek_to_first);
-  bool NeedToRebuild();
-  void Lock();
-  bool TryLock();
-  void UnLock();
-  DBImpl* const db_;
-  ReadOptions read_options_;
-  ColumnFamilyData* const cfd_;
-  ColumnFamilyHandleInternal cfh_;
+    private:
+	void RebuildIterator();
+	void UpdateCurrent();
+	void SeekInternal(const Slice &user_key, bool seek_to_first);
+	bool NeedToRebuild();
+	void Lock();
+	bool TryLock();
+	void UnLock();
+	DBImpl *const db_;
+	ReadOptions read_options_;
+	ColumnFamilyData *const cfd_;
+	ColumnFamilyHandleInternal cfh_;
 
-  uint64_t svnum_;
-  std::unique_ptr<Iterator> mutable_iter_;
-  // internal iterator status
-  Status status_;
-  bool valid_;
+	uint64_t svnum_;
+	std::unique_ptr<Iterator> mutable_iter_;
+	// internal iterator status
+	Status status_;
+	bool valid_;
 
-  IterKey cached_key_;
-  IterKey cached_value_;
+	IterKey cached_key_;
+	IterKey cached_value_;
 
-  bool only_drop_old_ = true;
-  bool snapshot_created_;
-  bool release_supported_;
-  std::mutex in_use_;  // is managed iterator in use
+	bool only_drop_old_ = true;
+	bool snapshot_created_;
+	bool release_supported_;
+	std::mutex in_use_; // is managed iterator in use
 };
 
-}  // namespace rocksdb
-#endif  // !ROCKSDB_LITE
+} // namespace rocksdb
+#endif // !ROCKSDB_LITE

@@ -39,7 +39,6 @@
 #undef DeleteFile
 #undef GetCurrentTime
 
-
 #ifndef strcasecmp
 #define strcasecmp _stricmp
 #endif
@@ -73,12 +72,12 @@ typedef SSIZE_T ssize_t;
 #define PLATFORM_IS_LITTLE_ENDIAN (__BYTE_ORDER == __LITTLE_ENDIAN)
 #endif
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 #define PREFETCH(addr, rw, locality)
 
-namespace port {
-
+namespace port
+{
 // VS 15
 #if (defined _MSC_VER) && (_MSC_VER >= 1900)
 
@@ -118,99 +117,120 @@ const bool kLittleEndian = true;
 class CondVar;
 
 class Mutex {
- public:
-
-   /* implicit */ Mutex(bool adaptive = false)
+    public:
+	/* implicit */ Mutex(bool adaptive = false)
 #ifndef NDEBUG
-     : locked_(false)
+		: locked_(false)
 #endif
-   { }
+	{
+	}
 
-  ~Mutex();
+	~Mutex();
 
-  void Lock() {
-    mutex_.lock();
+	void Lock()
+	{
+		mutex_.lock();
 #ifndef NDEBUG
-    locked_ = true;
+		locked_ = true;
 #endif
-  }
+	}
 
-  void Unlock() {
+	void Unlock()
+	{
 #ifndef NDEBUG
-    locked_ = false;
+		locked_ = false;
 #endif
-    mutex_.unlock();
-  }
+		mutex_.unlock();
+	}
 
-  // this will assert if the mutex is not locked
-  // it does NOT verify that mutex is held by a calling thread
-  void AssertHeld() {
+	// this will assert if the mutex is not locked
+	// it does NOT verify that mutex is held by a calling thread
+	void AssertHeld()
+	{
 #ifndef NDEBUG
-    assert(locked_);
+		assert(locked_);
 #endif
-  }
+	}
 
-  // Mutex is move only with lock ownership transfer
-  Mutex(const Mutex&) = delete;
-  void operator=(const Mutex&) = delete;
+	// Mutex is move only with lock ownership transfer
+	Mutex(const Mutex &) = delete;
+	void operator=(const Mutex &) = delete;
 
- private:
+    private:
+	friend class CondVar;
 
-  friend class CondVar;
+	std::mutex &getLock()
+	{
+		return mutex_;
+	}
 
-  std::mutex& getLock() {
-    return mutex_;
-  }
-
-  std::mutex mutex_;
+	std::mutex mutex_;
 #ifndef NDEBUG
-  bool locked_;
+	bool locked_;
 #endif
 };
 
 class RWMutex {
- public:
-  RWMutex() { InitializeSRWLock(&srwLock_); }
+    public:
+	RWMutex()
+	{
+		InitializeSRWLock(&srwLock_);
+	}
 
-  void ReadLock() { AcquireSRWLockShared(&srwLock_); }
+	void ReadLock()
+	{
+		AcquireSRWLockShared(&srwLock_);
+	}
 
-  void WriteLock() { AcquireSRWLockExclusive(&srwLock_); }
+	void WriteLock()
+	{
+		AcquireSRWLockExclusive(&srwLock_);
+	}
 
-  void ReadUnlock() { ReleaseSRWLockShared(&srwLock_); }
+	void ReadUnlock()
+	{
+		ReleaseSRWLockShared(&srwLock_);
+	}
 
-  void WriteUnlock() { ReleaseSRWLockExclusive(&srwLock_); }
+	void WriteUnlock()
+	{
+		ReleaseSRWLockExclusive(&srwLock_);
+	}
 
-  // Empty as in POSIX
-  void AssertHeld() {}
+	// Empty as in POSIX
+	void AssertHeld()
+	{
+	}
 
- private:
-  SRWLOCK srwLock_;
-  // No copying allowed
-  RWMutex(const RWMutex&);
-  void operator=(const RWMutex&);
+    private:
+	SRWLOCK srwLock_;
+	// No copying allowed
+	RWMutex(const RWMutex &);
+	void operator=(const RWMutex &);
 };
 
 class CondVar {
- public:
-  explicit CondVar(Mutex* mu) : mu_(mu) {
-  }
+    public:
+	explicit CondVar(Mutex *mu) : mu_(mu)
+	{
+	}
 
-  ~CondVar();
-  void Wait();
-  bool TimedWait(uint64_t expiration_time);
-  void Signal();
-  void SignalAll();
+	~CondVar();
+	void Wait();
+	bool TimedWait(uint64_t expiration_time);
+	void Signal();
+	void SignalAll();
 
-  // Condition var is not copy/move constructible
-  CondVar(const CondVar&) = delete;
-  CondVar& operator=(const CondVar&) = delete;
+	// Condition var is not copy/move constructible
+	CondVar(const CondVar &) = delete;
+	CondVar &operator=(const CondVar &) = delete;
 
-  CondVar(CondVar&&) = delete;
-  CondVar& operator=(CondVar&&) = delete;
+	CondVar(CondVar &&) = delete;
+	CondVar &operator=(CondVar &&) = delete;
 
- private:
-  std::condition_variable cv_;
-  Mutex* mu_;
+    private:
+	std::condition_variable cv_;
+	Mutex *mu_;
 };
 
 // Wrapper around the platform efficient
@@ -221,29 +241,34 @@ using Thread = WindowsThread;
 // Posix semantics with initialization
 // adopted in the project
 struct OnceType {
+	struct Init {
+	};
 
-    struct Init {};
+	OnceType()
+	{
+	}
+	OnceType(const Init &)
+	{
+	}
+	OnceType(const OnceType &) = delete;
+	OnceType &operator=(const OnceType &) = delete;
 
-    OnceType() {}
-    OnceType(const Init&) {}
-    OnceType(const OnceType&) = delete;
-    OnceType& operator=(const OnceType&) = delete;
-
-    std::once_flag flag_;
+	std::once_flag flag_;
 };
 
 #define LEVELDB_ONCE_INIT port::OnceType::Init()
-extern void InitOnce(OnceType* once, void (*initializer)());
+extern void InitOnce(OnceType *once, void (*initializer)());
 
 #ifndef CACHE_LINE_SIZE
 #define CACHE_LINE_SIZE 64U
 #endif
 
-static inline void AsmVolatilePause() {
+static inline void AsmVolatilePause()
+{
 #if defined(_M_IX86) || defined(_M_X64)
-  YieldProcessor();
+	YieldProcessor();
 #endif
-  // it would be nice to get "wfe" on ARM here
+	// it would be nice to get "wfe" on ARM here
 }
 
 extern int PhysicalCoreID();
@@ -251,61 +276,65 @@ extern int PhysicalCoreID();
 // For Thread Local Storage abstraction
 typedef DWORD pthread_key_t;
 
-inline int pthread_key_create(pthread_key_t* key, void (*destructor)(void*)) {
-  // Not used
-  (void)destructor;
+inline int pthread_key_create(pthread_key_t *key, void (*destructor)(void *))
+{
+	// Not used
+	(void)destructor;
 
-  pthread_key_t k = TlsAlloc();
-  if (TLS_OUT_OF_INDEXES == k) {
-    return ENOMEM;
-  }
+	pthread_key_t k = TlsAlloc();
+	if (TLS_OUT_OF_INDEXES == k) {
+		return ENOMEM;
+	}
 
-  *key = k;
-  return 0;
+	*key = k;
+	return 0;
 }
 
-inline int pthread_key_delete(pthread_key_t key) {
-  if (!TlsFree(key)) {
-    return EINVAL;
-  }
-  return 0;
+inline int pthread_key_delete(pthread_key_t key)
+{
+	if (!TlsFree(key)) {
+		return EINVAL;
+	}
+	return 0;
 }
 
-inline int pthread_setspecific(pthread_key_t key, const void* value) {
-  if (!TlsSetValue(key, const_cast<void*>(value))) {
-    return ENOMEM;
-  }
-  return 0;
+inline int pthread_setspecific(pthread_key_t key, const void *value)
+{
+	if (!TlsSetValue(key, const_cast<void *>(value))) {
+		return ENOMEM;
+	}
+	return 0;
 }
 
-inline void* pthread_getspecific(pthread_key_t key) {
-  void* result = TlsGetValue(key);
-  if (!result) {
-    if (GetLastError() != ERROR_SUCCESS) {
-      errno = EINVAL;
-    } else {
-      errno = NOERROR;
-    }
-  }
-  return result;
+inline void *pthread_getspecific(pthread_key_t key)
+{
+	void *result = TlsGetValue(key);
+	if (!result) {
+		if (GetLastError() != ERROR_SUCCESS) {
+			errno = EINVAL;
+		} else {
+			errno = NOERROR;
+		}
+	}
+	return result;
 }
 
 // UNIX equiv although errno numbers will be off
 // using C-runtime to implement. Note, this does not
 // feel space with zeros in case the file is extended.
-int truncate(const char* path, int64_t length);
-void Crash(const std::string& srcfile, int srcline);
+int truncate(const char *path, int64_t length);
+void Crash(const std::string &srcfile, int srcline);
 extern int GetMaxOpenFiles();
 
-}  // namespace port
+} // namespace port
 
-using port::pthread_key_t;
+using port::pthread_getspecific;
 using port::pthread_key_create;
 using port::pthread_key_delete;
+using port::pthread_key_t;
 using port::pthread_setspecific;
-using port::pthread_getspecific;
 using port::truncate;
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // STORAGE_LEVELDB_PORT_PORT_WIN_H_
+#endif // STORAGE_LEVELDB_PORT_PORT_WIN_H_

@@ -7,20 +7,27 @@
 
 #include "rocksdb/db.h"
 
-namespace rocksdb {
-
-ManagedSnapshot::ManagedSnapshot(DB* db) : db_(db),
-                                           snapshot_(db->GetSnapshot()) {}
-
-ManagedSnapshot::ManagedSnapshot(DB* db, const Snapshot* _snapshot)
-    : db_(db), snapshot_(_snapshot) {}
-
-ManagedSnapshot::~ManagedSnapshot() {
-  if (snapshot_) {
-    db_->ReleaseSnapshot(snapshot_);
-  }
+namespace rocksdb
+{
+ManagedSnapshot::ManagedSnapshot(DB *db) : db_(db), snapshot_(db->GetSnapshot())
+{
 }
 
-const Snapshot* ManagedSnapshot::snapshot() { return snapshot_;}
+ManagedSnapshot::ManagedSnapshot(DB *db, const Snapshot *_snapshot)
+	: db_(db), snapshot_(_snapshot)
+{
+}
 
-}  // namespace rocksdb
+ManagedSnapshot::~ManagedSnapshot()
+{
+	if (snapshot_) {
+		db_->ReleaseSnapshot(snapshot_);
+	}
+}
+
+const Snapshot *ManagedSnapshot::snapshot()
+{
+	return snapshot_;
+}
+
+} // namespace rocksdb

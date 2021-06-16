@@ -10,18 +10,20 @@
 
 #include "db/db_impl.h"
 
-namespace rocksdb {
-
-void CancelAllBackgroundWork(DB* db, bool wait) {
-  (dynamic_cast<DBImpl*>(db->GetRootDB()))->CancelAllBackgroundWork(wait);
+namespace rocksdb
+{
+void CancelAllBackgroundWork(DB *db, bool wait)
+{
+	(dynamic_cast<DBImpl *>(db->GetRootDB()))->CancelAllBackgroundWork(wait);
 }
 
-Status DeleteFilesInRange(DB* db, ColumnFamilyHandle* column_family,
-                          const Slice* begin, const Slice* end) {
-  return (dynamic_cast<DBImpl*>(db->GetRootDB()))
-      ->DeleteFilesInRange(column_family, begin, end);
+Status DeleteFilesInRange(DB *db, ColumnFamilyHandle *column_family,
+			  const Slice *begin, const Slice *end)
+{
+	return (dynamic_cast<DBImpl *>(db->GetRootDB()))
+		->DeleteFilesInRange(column_family, begin, end);
 }
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // ROCKSDB_LITE
+#endif // ROCKSDB_LITE

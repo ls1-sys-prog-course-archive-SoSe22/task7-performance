@@ -16,15 +16,17 @@
  * Method:    newClockCache
  * Signature: (JIZ)J
  */
-jlong Java_org_rocksdb_ClockCache_newClockCache(
-    JNIEnv* env, jclass jcls, jlong jcapacity, jint jnum_shard_bits,
-    jboolean jstrict_capacity_limit) {
-  auto* sptr_clock_cache =
-      new std::shared_ptr<rocksdb::Cache>(rocksdb::NewClockCache(
-          static_cast<size_t>(jcapacity),
-          static_cast<int>(jnum_shard_bits),
-          static_cast<bool>(jstrict_capacity_limit)));
-  return reinterpret_cast<jlong>(sptr_clock_cache);
+jlong Java_org_rocksdb_ClockCache_newClockCache(JNIEnv *env, jclass jcls,
+						jlong jcapacity,
+						jint jnum_shard_bits,
+						jboolean jstrict_capacity_limit)
+{
+	auto *sptr_clock_cache =
+		new std::shared_ptr<rocksdb::Cache>(rocksdb::NewClockCache(
+			static_cast<size_t>(jcapacity),
+			static_cast<int>(jnum_shard_bits),
+			static_cast<bool>(jstrict_capacity_limit)));
+	return reinterpret_cast<jlong>(sptr_clock_cache);
 }
 
 /*
@@ -32,9 +34,10 @@ jlong Java_org_rocksdb_ClockCache_newClockCache(
  * Method:    disposeInternal
  * Signature: (J)V
  */
-void Java_org_rocksdb_ClockCache_disposeInternal(
-    JNIEnv* env, jobject jobj, jlong jhandle) {
-  auto* sptr_clock_cache =
-      reinterpret_cast<std::shared_ptr<rocksdb::Cache> *>(jhandle);
-  delete sptr_clock_cache;  // delete std::shared_ptr
+void Java_org_rocksdb_ClockCache_disposeInternal(JNIEnv *env, jobject jobj,
+						 jlong jhandle)
+{
+	auto *sptr_clock_cache =
+		reinterpret_cast<std::shared_ptr<rocksdb::Cache> *>(jhandle);
+	delete sptr_clock_cache; // delete std::shared_ptr
 }

@@ -12,30 +12,33 @@
 #include "rocksdb/db.h"
 #include "rocksdb/types.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 // Data associated with a particular version of a key. A database may internally
 // store multiple versions of a same user key due to snapshots, compaction not
 // happening yet, etc.
 struct KeyVersion {
-  KeyVersion(const std::string& _user_key, const std::string& _value,
-             SequenceNumber _sequence, int _type)
-      : user_key(_user_key), value(_value), sequence(_sequence), type(_type) {}
+	KeyVersion(const std::string &_user_key, const std::string &_value,
+		   SequenceNumber _sequence, int _type)
+		: user_key(_user_key), value(_value), sequence(_sequence),
+		  type(_type)
+	{
+	}
 
-  std::string user_key;
-  std::string value;
-  SequenceNumber sequence;
-  // TODO(ajkr): we should provide a helper function that converts the int to a
-  // string describing the type for easier debugging.
-  int type;
+	std::string user_key;
+	std::string value;
+	SequenceNumber sequence;
+	// TODO(ajkr): we should provide a helper function that converts the int to a
+	// string describing the type for easier debugging.
+	int type;
 };
 
 // Returns listing of all versions of keys in the provided user key range.
 // The range is inclusive-inclusive, i.e., [`begin_key`, `end_key`].
 // The result is inserted into the provided vector, `key_versions`.
-Status GetAllKeyVersions(DB* db, Slice begin_key, Slice end_key,
-                         std::vector<KeyVersion>* key_versions);
+Status GetAllKeyVersions(DB *db, Slice begin_key, Slice end_key,
+			 std::vector<KeyVersion> *key_versions);
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // ROCKSDB_LITE
+#endif // ROCKSDB_LITE

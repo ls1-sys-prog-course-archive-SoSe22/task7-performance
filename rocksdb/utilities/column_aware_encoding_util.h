@@ -15,66 +15,69 @@
 #include "options/cf_options.h"
 #include "table/block_based_table_reader.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 struct ColDeclaration;
 struct KVPairColDeclarations;
 
 class ColumnAwareEncodingReader {
- public:
-  explicit ColumnAwareEncodingReader(const std::string& file_name);
+    public:
+	explicit ColumnAwareEncodingReader(const std::string &file_name);
 
-  void GetKVPairsFromDataBlocks(std::vector<KVPairBlock>* kv_pair_blocks);
+	void GetKVPairsFromDataBlocks(std::vector<KVPairBlock> *kv_pair_blocks);
 
-  void EncodeBlocksToRowFormat(WritableFile* out_file,
-                               CompressionType compression_type,
-                               const std::vector<KVPairBlock>& kv_pair_blocks,
-                               std::vector<std::string>* blocks);
+	void
+	EncodeBlocksToRowFormat(WritableFile *out_file,
+				CompressionType compression_type,
+				const std::vector<KVPairBlock> &kv_pair_blocks,
+				std::vector<std::string> *blocks);
 
-  void DecodeBlocksFromRowFormat(WritableFile* out_file,
-                                 const std::vector<std::string>* blocks);
+	void DecodeBlocksFromRowFormat(WritableFile *out_file,
+				       const std::vector<std::string> *blocks);
 
-  void DumpDataColumns(const std::string& filename,
-                       const KVPairColDeclarations& kvp_col_declarations,
-                       const std::vector<KVPairBlock>& kv_pair_blocks);
+	void DumpDataColumns(const std::string &filename,
+			     const KVPairColDeclarations &kvp_col_declarations,
+			     const std::vector<KVPairBlock> &kv_pair_blocks);
 
-  Status EncodeBlocks(const KVPairColDeclarations& kvp_col_declarations,
-                      WritableFile* out_file, CompressionType compression_type,
-                      const std::vector<KVPairBlock>& kv_pair_blocks,
-                      std::vector<std::string>* blocks, bool print_column_stat);
+	Status EncodeBlocks(const KVPairColDeclarations &kvp_col_declarations,
+			    WritableFile *out_file,
+			    CompressionType compression_type,
+			    const std::vector<KVPairBlock> &kv_pair_blocks,
+			    std::vector<std::string> *blocks,
+			    bool print_column_stat);
 
-  void DecodeBlocks(const KVPairColDeclarations& kvp_col_declarations,
-                    WritableFile* out_file,
-                    const std::vector<std::string>* blocks);
+	void DecodeBlocks(const KVPairColDeclarations &kvp_col_declarations,
+			  WritableFile *out_file,
+			  const std::vector<std::string> *blocks);
 
-  static void GetColDeclarationsPrimary(
-      std::vector<ColDeclaration>** key_col_declarations,
-      std::vector<ColDeclaration>** value_col_declarations,
-      ColDeclaration** value_checksum_declaration);
+	static void GetColDeclarationsPrimary(
+		std::vector<ColDeclaration> **key_col_declarations,
+		std::vector<ColDeclaration> **value_col_declarations,
+		ColDeclaration **value_checksum_declaration);
 
-  static void GetColDeclarationsSecondary(
-      std::vector<ColDeclaration>** key_col_declarations,
-      std::vector<ColDeclaration>** value_col_declarations,
-      ColDeclaration** value_checksum_declaration);
+	static void GetColDeclarationsSecondary(
+		std::vector<ColDeclaration> **key_col_declarations,
+		std::vector<ColDeclaration> **value_col_declarations,
+		ColDeclaration **value_checksum_declaration);
 
- private:
-  // Init the TableReader for the sst file
-  void InitTableReader(const std::string& file_path);
+    private:
+	// Init the TableReader for the sst file
+	void InitTableReader(const std::string &file_path);
 
-  std::string file_name_;
-  EnvOptions soptions_;
+	std::string file_name_;
+	EnvOptions soptions_;
 
-  Options options_;
+	Options options_;
 
-  Status init_result_;
-  std::unique_ptr<BlockBasedTable> table_reader_;
-  std::unique_ptr<RandomAccessFileReader> file_;
+	Status init_result_;
+	std::unique_ptr<BlockBasedTable> table_reader_;
+	std::unique_ptr<RandomAccessFileReader> file_;
 
-  const ImmutableCFOptions ioptions_;
-  InternalKeyComparator internal_comparator_;
-  std::unique_ptr<TableProperties> table_properties_;
+	const ImmutableCFOptions ioptions_;
+	InternalKeyComparator internal_comparator_;
+	std::unique_ptr<TableProperties> table_properties_;
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // ROCKSDB_LITE
+#endif // ROCKSDB_LITE

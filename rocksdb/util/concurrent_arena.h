@@ -24,10 +24,10 @@
 #define ROCKSDB_FIELD_UNUSED __attribute__((__unused__))
 #else
 #define ROCKSDB_FIELD_UNUSED
-#endif  // __clang__
+#endif // __clang__
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class Logger;
 
 // ConcurrentArena wraps an Arena.  It makes it thread safe using a fast
@@ -38,163 +38,188 @@ class Logger;
 // adjust their size so that there is no fragmentation waste when the
 // shard blocks are allocated from the underlying main arena.
 class ConcurrentArena : public Allocator {
- public:
-  // block_size and huge_page_size are the same as for Arena (and are
-  // in fact just passed to the constructor of arena_.  The core-local
-  // shards compute their shard_block_size as a fraction of block_size
-  // that varies according to the hardware concurrency level.
-  explicit ConcurrentArena(size_t block_size = Arena::kMinBlockSize,
-                           AllocTracker* tracker = nullptr,
-                           size_t huge_page_size = 0);
+    public:
+	// block_size and huge_page_size are the same as for Arena (and are
+	// in fact just passed to the constructor of arena_.  The core-local
+	// shards compute their shard_block_size as a fraction of block_size
+	// that varies according to the hardware concurrency level.
+	explicit ConcurrentArena(size_t block_size = Arena::kMinBlockSize,
+				 AllocTracker *tracker = nullptr,
+				 size_t huge_page_size = 0);
 
-  char* Allocate(size_t bytes) override {
-    return AllocateImpl(bytes, false /*force_arena*/,
-                        [=]() { return arena_.Allocate(bytes); });
-  }
+	char *Allocate(size_t bytes) override
+	{
+		return AllocateImpl(bytes, false /*force_arena*/,
+				    [=]() { return arena_.Allocate(bytes); });
+	}
 
-  char* AllocateAligned(size_t bytes, size_t huge_page_size = 0,
-                        Logger* logger = nullptr) override {
-    size_t rounded_up = ((bytes - 1) | (sizeof(void*) - 1)) + 1;
-    assert(rounded_up >= bytes && rounded_up < bytes + sizeof(void*) &&
-           (rounded_up % sizeof(void*)) == 0);
+	char *AllocateAligned(size_t bytes, size_t huge_page_size = 0,
+			      Logger *logger = nullptr) override
+	{
+		size_t rounded_up = ((bytes - 1) | (sizeof(void *) - 1)) + 1;
+		assert(rounded_up >= bytes &&
+		       rounded_up < bytes + sizeof(void *) &&
+		       (rounded_up % sizeof(void *)) == 0);
 
-    return AllocateImpl(rounded_up, huge_page_size != 0 /*force_arena*/, [=]() {
-      return arena_.AllocateAligned(rounded_up, huge_page_size, logger);
-    });
-  }
+		return AllocateImpl(
+			rounded_up, huge_page_size != 0 /*force_arena*/, [=]() {
+				return arena_.AllocateAligned(
+					rounded_up, huge_page_size, logger);
+			});
+	}
 
-  size_t ApproximateMemoryUsage() const {
-    std::unique_lock<SpinMutex> lock(arena_mutex_, std::defer_lock);
-    lock.lock();
-    return arena_.ApproximateMemoryUsage() - ShardAllocatedAndUnused();
-  }
+	size_t ApproximateMemoryUsage() const
+	{
+		std::unique_lock<SpinMutex> lock(arena_mutex_, std::defer_lock);
+		lock.lock();
+		return arena_.ApproximateMemoryUsage() -
+		       ShardAllocatedAndUnused();
+	}
 
-  size_t MemoryAllocatedBytes() const {
-    return memory_allocated_bytes_.load(std::memory_order_relaxed);
-  }
+	size_t MemoryAllocatedBytes() const
+	{
+		return memory_allocated_bytes_.load(std::memory_order_relaxed);
+	}
 
-  size_t AllocatedAndUnused() const {
-    return arena_allocated_and_unused_.load(std::memory_order_relaxed) +
-           ShardAllocatedAndUnused();
-  }
+	size_t AllocatedAndUnused() const
+	{
+		return arena_allocated_and_unused_.load(
+			       std::memory_order_relaxed) +
+		       ShardAllocatedAndUnused();
+	}
 
-  size_t IrregularBlockNum() const {
-    return irregular_block_num_.load(std::memory_order_relaxed);
-  }
+	size_t IrregularBlockNum() const
+	{
+		return irregular_block_num_.load(std::memory_order_relaxed);
+	}
 
-  size_t BlockSize() const override { return arena_.BlockSize(); }
+	size_t BlockSize() const override
+	{
+		return arena_.BlockSize();
+	}
 
- private:
-  struct Shard {
-    char padding[40] ROCKSDB_FIELD_UNUSED;
-    mutable SpinMutex mutex;
-    char* free_begin_;
-    std::atomic<size_t> allocated_and_unused_;
+    private:
+	struct Shard {
+		char padding[40] ROCKSDB_FIELD_UNUSED;
+		mutable SpinMutex mutex;
+		char *free_begin_;
+		std::atomic<size_t> allocated_and_unused_;
 
-    Shard() : allocated_and_unused_(0) {}
-  };
+		Shard() : allocated_and_unused_(0)
+		{
+		}
+	};
 
 #ifdef ROCKSDB_SUPPORT_THREAD_LOCAL
-  static __thread size_t tls_cpuid;
+	static __thread size_t tls_cpuid;
 #else
-  enum ZeroFirstEnum : size_t { tls_cpuid = 0 };
+	enum ZeroFirstEnum : size_t { tls_cpuid = 0 };
 #endif
 
-  char padding0[56] ROCKSDB_FIELD_UNUSED;
+	char padding0[56] ROCKSDB_FIELD_UNUSED;
 
-  size_t shard_block_size_;
+	size_t shard_block_size_;
 
-  CoreLocalArray<Shard> shards_;
+	CoreLocalArray<Shard> shards_;
 
-  Arena arena_;
-  mutable SpinMutex arena_mutex_;
-  std::atomic<size_t> arena_allocated_and_unused_;
-  std::atomic<size_t> memory_allocated_bytes_;
-  std::atomic<size_t> irregular_block_num_;
+	Arena arena_;
+	mutable SpinMutex arena_mutex_;
+	std::atomic<size_t> arena_allocated_and_unused_;
+	std::atomic<size_t> memory_allocated_bytes_;
+	std::atomic<size_t> irregular_block_num_;
 
-  char padding1[56] ROCKSDB_FIELD_UNUSED;
+	char padding1[56] ROCKSDB_FIELD_UNUSED;
 
-  Shard* Repick();
+	Shard *Repick();
 
-  size_t ShardAllocatedAndUnused() const {
-    size_t total = 0;
-    for (size_t i = 0; i < shards_.Size(); ++i) {
-      total += shards_.AccessAtCore(i)->allocated_and_unused_.load(
-          std::memory_order_relaxed);
-    }
-    return total;
-  }
+	size_t ShardAllocatedAndUnused() const
+	{
+		size_t total = 0;
+		for (size_t i = 0; i < shards_.Size(); ++i) {
+			total += shards_.AccessAtCore(i)
+					 ->allocated_and_unused_.load(
+						 std::memory_order_relaxed);
+		}
+		return total;
+	}
 
-  template <typename Func>
-  char* AllocateImpl(size_t bytes, bool force_arena, const Func& func) {
-    size_t cpu;
+	template <typename Func>
+	char *AllocateImpl(size_t bytes, bool force_arena, const Func &func)
+	{
+		size_t cpu;
 
-    // Go directly to the arena if the allocation is too large, or if
-    // we've never needed to Repick() and the arena mutex is available
-    // with no waiting.  This keeps the fragmentation penalty of
-    // concurrency zero unless it might actually confer an advantage.
-    std::unique_lock<SpinMutex> arena_lock(arena_mutex_, std::defer_lock);
-    if (bytes > shard_block_size_ / 4 || force_arena ||
-        ((cpu = tls_cpuid) == 0 &&
-         !shards_.AccessAtCore(0)->allocated_and_unused_.load(
-             std::memory_order_relaxed) &&
-         arena_lock.try_lock())) {
-      if (!arena_lock.owns_lock()) {
-        arena_lock.lock();
-      }
-      auto rv = func();
-      Fixup();
-      return rv;
-    }
+		// Go directly to the arena if the allocation is too large, or if
+		// we've never needed to Repick() and the arena mutex is available
+		// with no waiting.  This keeps the fragmentation penalty of
+		// concurrency zero unless it might actually confer an advantage.
+		std::unique_lock<SpinMutex> arena_lock(arena_mutex_,
+						       std::defer_lock);
+		if (bytes > shard_block_size_ / 4 || force_arena ||
+		    ((cpu = tls_cpuid) == 0 &&
+		     !shards_.AccessAtCore(0)->allocated_and_unused_.load(
+			     std::memory_order_relaxed) &&
+		     arena_lock.try_lock())) {
+			if (!arena_lock.owns_lock()) {
+				arena_lock.lock();
+			}
+			auto rv = func();
+			Fixup();
+			return rv;
+		}
 
-    // pick a shard from which to allocate
-    Shard* s = shards_.AccessAtCore(cpu & (shards_.Size() - 1));
-    if (!s->mutex.try_lock()) {
-      s = Repick();
-      s->mutex.lock();
-    }
-    std::unique_lock<SpinMutex> lock(s->mutex, std::adopt_lock);
+		// pick a shard from which to allocate
+		Shard *s = shards_.AccessAtCore(cpu & (shards_.Size() - 1));
+		if (!s->mutex.try_lock()) {
+			s = Repick();
+			s->mutex.lock();
+		}
+		std::unique_lock<SpinMutex> lock(s->mutex, std::adopt_lock);
 
-    size_t avail = s->allocated_and_unused_.load(std::memory_order_relaxed);
-    if (avail < bytes) {
-      // reload
-      std::lock_guard<SpinMutex> reload_lock(arena_mutex_);
+		size_t avail = s->allocated_and_unused_.load(
+			std::memory_order_relaxed);
+		if (avail < bytes) {
+			// reload
+			std::lock_guard<SpinMutex> reload_lock(arena_mutex_);
 
-      // If the arena's current block is within a factor of 2 of the right
-      // size, we adjust our request to avoid arena waste.
-      auto exact = arena_allocated_and_unused_.load(std::memory_order_relaxed);
-      assert(exact == arena_.AllocatedAndUnused());
-      avail = exact >= shard_block_size_ / 2 && exact < shard_block_size_ * 2
-                  ? exact
-                  : shard_block_size_;
-      s->free_begin_ = arena_.AllocateAligned(avail);
-      Fixup();
-    }
-    s->allocated_and_unused_.store(avail - bytes, std::memory_order_relaxed);
+			// If the arena's current block is within a factor of 2 of the right
+			// size, we adjust our request to avoid arena waste.
+			auto exact = arena_allocated_and_unused_.load(
+				std::memory_order_relaxed);
+			assert(exact == arena_.AllocatedAndUnused());
+			avail = exact >= shard_block_size_ / 2 &&
+						exact < shard_block_size_ * 2 ?
+					      exact :
+					      shard_block_size_;
+			s->free_begin_ = arena_.AllocateAligned(avail);
+			Fixup();
+		}
+		s->allocated_and_unused_.store(avail - bytes,
+					       std::memory_order_relaxed);
 
-    char* rv;
-    if ((bytes % sizeof(void*)) == 0) {
-      // aligned allocation from the beginning
-      rv = s->free_begin_;
-      s->free_begin_ += bytes;
-    } else {
-      // unaligned from the end
-      rv = s->free_begin_ + avail - bytes;
-    }
-    return rv;
-  }
+		char *rv;
+		if ((bytes % sizeof(void *)) == 0) {
+			// aligned allocation from the beginning
+			rv = s->free_begin_;
+			s->free_begin_ += bytes;
+		} else {
+			// unaligned from the end
+			rv = s->free_begin_ + avail - bytes;
+		}
+		return rv;
+	}
 
-  void Fixup() {
-    arena_allocated_and_unused_.store(arena_.AllocatedAndUnused(),
-                                      std::memory_order_relaxed);
-    memory_allocated_bytes_.store(arena_.MemoryAllocatedBytes(),
-                                  std::memory_order_relaxed);
-    irregular_block_num_.store(arena_.IrregularBlockNum(),
-                               std::memory_order_relaxed);
-  }
+	void Fixup()
+	{
+		arena_allocated_and_unused_.store(arena_.AllocatedAndUnused(),
+						  std::memory_order_relaxed);
+		memory_allocated_bytes_.store(arena_.MemoryAllocatedBytes(),
+					      std::memory_order_relaxed);
+		irregular_block_num_.store(arena_.IrregularBlockNum(),
+					   std::memory_order_relaxed);
+	}
 
-  ConcurrentArena(const ConcurrentArena&) = delete;
-  ConcurrentArena& operator=(const ConcurrentArena&) = delete;
+	ConcurrentArena(const ConcurrentArena &) = delete;
+	ConcurrentArena &operator=(const ConcurrentArena &) = delete;
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

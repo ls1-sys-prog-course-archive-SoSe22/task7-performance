@@ -12,8 +12,8 @@
 #include "rocksdb/utilities/stackable_db.h"
 #include "rocksdb/db.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 // Database with TTL support.
 //
 // USE-CASES:
@@ -45,24 +45,27 @@ namespace rocksdb {
 //  whole database may be deleted in a small amount of time
 
 class DBWithTTL : public StackableDB {
- public:
-  virtual Status CreateColumnFamilyWithTtl(
-      const ColumnFamilyOptions& options, const std::string& column_family_name,
-      ColumnFamilyHandle** handle, int ttl) = 0;
+    public:
+	virtual Status
+	CreateColumnFamilyWithTtl(const ColumnFamilyOptions &options,
+				  const std::string &column_family_name,
+				  ColumnFamilyHandle **handle, int ttl) = 0;
 
-  static Status Open(const Options& options, const std::string& dbname,
-                     DBWithTTL** dbptr, int32_t ttl = 0,
-                     bool read_only = false);
+	static Status Open(const Options &options, const std::string &dbname,
+			   DBWithTTL **dbptr, int32_t ttl = 0,
+			   bool read_only = false);
 
-  static Status Open(const DBOptions& db_options, const std::string& dbname,
-                     const std::vector<ColumnFamilyDescriptor>& column_families,
-                     std::vector<ColumnFamilyHandle*>* handles,
-                     DBWithTTL** dbptr, std::vector<int32_t> ttls,
-                     bool read_only = false);
+	static Status
+	Open(const DBOptions &db_options, const std::string &dbname,
+	     const std::vector<ColumnFamilyDescriptor> &column_families,
+	     std::vector<ColumnFamilyHandle *> *handles, DBWithTTL **dbptr,
+	     std::vector<int32_t> ttls, bool read_only = false);
 
- protected:
-  explicit DBWithTTL(DB* db) : StackableDB(db) {}
+    protected:
+	explicit DBWithTTL(DB *db) : StackableDB(db)
+	{
+	}
 };
 
-}  // namespace rocksdb
-#endif  // ROCKSDB_LITE
+} // namespace rocksdb
+#endif // ROCKSDB_LITE

@@ -9,8 +9,8 @@
 
 #include "rocksdb/table_properties.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 // Creates a factory of a table property collector that marks a SST
 // file as need-compaction when it observe at least "D" deletion
 // entries in any "N" consecutive entires.
@@ -21,9 +21,8 @@ namespace rocksdb {
 // @param deletion_trigger "D".  Note that even when "N" is changed,
 //     the specified number for "D" will not be changed.
 extern std::shared_ptr<TablePropertiesCollectorFactory>
-    NewCompactOnDeletionCollectorFactory(
-        size_t sliding_window_size,
-        size_t deletion_trigger);
-}  // namespace rocksdb
+NewCompactOnDeletionCollectorFactory(size_t sliding_window_size,
+				     size_t deletion_trigger);
+} // namespace rocksdb
 
-#endif  // !ROCKSDB_LITE
+#endif // !ROCKSDB_LITE

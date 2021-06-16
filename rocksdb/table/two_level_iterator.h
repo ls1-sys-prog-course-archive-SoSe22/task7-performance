@@ -12,25 +12,28 @@
 #include "rocksdb/env.h"
 #include "table/iterator_wrapper.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 struct ReadOptions;
 class InternalKeyComparator;
 class Arena;
 
 struct TwoLevelIteratorState {
-  explicit TwoLevelIteratorState(bool _check_prefix_may_match)
-      : check_prefix_may_match(_check_prefix_may_match) {}
+	explicit TwoLevelIteratorState(bool _check_prefix_may_match)
+		: check_prefix_may_match(_check_prefix_may_match)
+	{
+	}
 
-  virtual ~TwoLevelIteratorState() {}
-  virtual InternalIterator* NewSecondaryIterator(const Slice& handle) = 0;
-  virtual bool PrefixMayMatch(const Slice& internal_key) = 0;
-  virtual bool KeyReachedUpperBound(const Slice& internal_key) = 0;
+	virtual ~TwoLevelIteratorState()
+	{
+	}
+	virtual InternalIterator *NewSecondaryIterator(const Slice &handle) = 0;
+	virtual bool PrefixMayMatch(const Slice &internal_key) = 0;
+	virtual bool KeyReachedUpperBound(const Slice &internal_key) = 0;
 
-  // If call PrefixMayMatch()
-  bool check_prefix_may_match;
+	// If call PrefixMayMatch()
+	bool check_prefix_may_match;
 };
-
 
 // Return a new two level iterator.  A two-level iterator contains an
 // index iterator whose values point to a sequence of blocks where
@@ -46,8 +49,9 @@ struct TwoLevelIteratorState {
 //        all the states but those allocated in arena.
 // need_free_iter_and_state: free `state` and `first_level_iter` if
 //                           true. Otherwise, just call destructor.
-extern InternalIterator* NewTwoLevelIterator(
-    TwoLevelIteratorState* state, InternalIterator* first_level_iter,
-    Arena* arena = nullptr, bool need_free_iter_and_state = true);
+extern InternalIterator *
+NewTwoLevelIterator(TwoLevelIteratorState *state,
+		    InternalIterator *first_level_iter, Arena *arena = nullptr,
+		    bool need_free_iter_and_state = true);
 
-}  // namespace rocksdb
+} // namespace rocksdb

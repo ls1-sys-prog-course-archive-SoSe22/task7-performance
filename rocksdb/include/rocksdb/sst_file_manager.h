@@ -11,8 +11,8 @@
 
 #include "rocksdb/status.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class Env;
 class Logger;
 
@@ -20,41 +20,43 @@ class Logger;
 // deletion rate.
 // All SstFileManager public functions are thread-safe.
 class SstFileManager {
- public:
-  virtual ~SstFileManager() {}
+    public:
+	virtual ~SstFileManager()
+	{
+	}
 
-  // Update the maximum allowed space that should be used by RocksDB, if
-  // the total size of the SST files exceeds max_allowed_space, writes to
-  // RocksDB will fail.
-  //
-  // Setting max_allowed_space to 0 will disable this feature, maximum allowed
-  // space will be infinite (Default value).
-  //
-  // thread-safe.
-  virtual void SetMaxAllowedSpaceUsage(uint64_t max_allowed_space) = 0;
+	// Update the maximum allowed space that should be used by RocksDB, if
+	// the total size of the SST files exceeds max_allowed_space, writes to
+	// RocksDB will fail.
+	//
+	// Setting max_allowed_space to 0 will disable this feature, maximum allowed
+	// space will be infinite (Default value).
+	//
+	// thread-safe.
+	virtual void SetMaxAllowedSpaceUsage(uint64_t max_allowed_space) = 0;
 
-  // Return true if the total size of SST files exceeded the maximum allowed
-  // space usage.
-  //
-  // thread-safe.
-  virtual bool IsMaxAllowedSpaceReached() = 0;
+	// Return true if the total size of SST files exceeded the maximum allowed
+	// space usage.
+	//
+	// thread-safe.
+	virtual bool IsMaxAllowedSpaceReached() = 0;
 
-  // Return the total size of all tracked files.
-  // thread-safe
-  virtual uint64_t GetTotalSize() = 0;
+	// Return the total size of all tracked files.
+	// thread-safe
+	virtual uint64_t GetTotalSize() = 0;
 
-  // Return a map containing all tracked files and there corresponding sizes.
-  // thread-safe
-  virtual std::unordered_map<std::string, uint64_t> GetTrackedFiles() = 0;
+	// Return a map containing all tracked files and there corresponding sizes.
+	// thread-safe
+	virtual std::unordered_map<std::string, uint64_t> GetTrackedFiles() = 0;
 
-  // Return delete rate limit in bytes per second.
-  // thread-safe
-  virtual int64_t GetDeleteRateBytesPerSecond() = 0;
+	// Return delete rate limit in bytes per second.
+	// thread-safe
+	virtual int64_t GetDeleteRateBytesPerSecond() = 0;
 
-  // Update the delete rate limit in bytes per second.
-  // zero means disable delete rate limiting and delete files immediately
-  // thread-safe
-  virtual void SetDeleteRateBytesPerSecond(int64_t delete_rate) = 0;
+	// Update the delete rate limit in bytes per second.
+	// zero means disable delete rate limiting and delete files immediately
+	// thread-safe
+	virtual void SetDeleteRateBytesPerSecond(int64_t delete_rate) = 0;
 };
 
 // Create a new SstFileManager that can be shared among multiple RocksDB
@@ -77,9 +79,9 @@ class SstFileManager {
 //    SstFileManager will delete files that already exist in trash_dir.
 // @param status: If not nullptr, status will contain any errors that happened
 //    during creating the missing trash_dir or deleting existing files in trash.
-extern SstFileManager* NewSstFileManager(
-    Env* env, std::shared_ptr<Logger> info_log = nullptr,
-    std::string trash_dir = "", int64_t rate_bytes_per_sec = 0,
-    bool delete_existing_trash = true, Status* status = nullptr);
+extern SstFileManager *
+NewSstFileManager(Env *env, std::shared_ptr<Logger> info_log = nullptr,
+		  std::string trash_dir = "", int64_t rate_bytes_per_sec = 0,
+		  bool delete_existing_trash = true, Status *status = nullptr);
 
-}  // namespace rocksdb
+} // namespace rocksdb

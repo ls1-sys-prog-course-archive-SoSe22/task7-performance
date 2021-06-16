@@ -38,105 +38,127 @@
 // implementation is not concurrent at this point though.
 //
 // The eviction algorithm is LRU
-namespace rocksdb {
-
+namespace rocksdb
+{
 class VolatileCacheTier : public PersistentCacheTier {
- public:
-  explicit VolatileCacheTier(
-      const bool is_compressed = true,
-      const size_t max_size = std::numeric_limits<size_t>::max())
-      : is_compressed_(is_compressed), max_size_(max_size) {}
+    public:
+	explicit VolatileCacheTier(
+		const bool is_compressed = true,
+		const size_t max_size = std::numeric_limits<size_t>::max())
+		: is_compressed_(is_compressed), max_size_(max_size)
+	{
+	}
 
-  virtual ~VolatileCacheTier();
+	virtual ~VolatileCacheTier();
 
-  // insert to cache
-  Status Insert(const Slice& page_key, const char* data,
-                const size_t size) override;
-  // lookup key in cache
-  Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
-                size_t* size) override;
+	// insert to cache
+	Status Insert(const Slice &page_key, const char *data,
+		      const size_t size) override;
+	// lookup key in cache
+	Status Lookup(const Slice &page_key, std::unique_ptr<char[]> *data,
+		      size_t *size) override;
 
-  // is compressed cache ?
-  bool IsCompressed() override { return is_compressed_; }
+	// is compressed cache ?
+	bool IsCompressed() override
+	{
+		return is_compressed_;
+	}
 
-  // erase key from cache
-  bool Erase(const Slice& key) override;
+	// erase key from cache
+	bool Erase(const Slice &key) override;
 
-  std::string GetPrintableOptions() const override {
-    return "VolatileCacheTier";
-  }
+	std::string GetPrintableOptions() const override
+	{
+		return "VolatileCacheTier";
+	}
 
-  // Expose stats as map
-  PersistentCache::StatsType Stats() override;
+	// Expose stats as map
+	PersistentCache::StatsType Stats() override;
 
- private:
-  //
-  // Cache data abstraction
-  //
-  struct CacheData : LRUElement<CacheData> {
-    explicit CacheData(CacheData&& rhs) ROCKSDB_NOEXCEPT
-        : key(std::move(rhs.key)),
-          value(std::move(rhs.value)) {}
+    private:
+	//
+	// Cache data abstraction
+	//
+	struct CacheData : LRUElement<CacheData> {
+		explicit CacheData(CacheData &&rhs) ROCKSDB_NOEXCEPT
+			: key(std::move(rhs.key)),
+			  value(std::move(rhs.value))
+		{
+		}
 
-    explicit CacheData(const std::string& _key, const std::string& _value = "")
-        : key(_key), value(_value) {}
+		explicit CacheData(const std::string &_key,
+				   const std::string &_value = "")
+			: key(_key), value(_value)
+		{
+		}
 
-    virtual ~CacheData() {}
+		virtual ~CacheData()
+		{
+		}
 
-    const std::string key;
-    const std::string value;
-  };
+		const std::string key;
+		const std::string value;
+	};
 
-  static void DeleteCacheData(CacheData* data);
+	static void DeleteCacheData(CacheData *data);
 
-  //
-  // Index and LRU definition
-  //
-  struct CacheDataHash {
-    uint64_t operator()(const CacheData* obj) const {
-      assert(obj);
-      return std::hash<std::string>()(obj->key);
-    }
-  };
+	//
+	// Index and LRU definition
+	//
+	struct CacheDataHash {
+		uint64_t operator()(const CacheData *obj) const
+		{
+			assert(obj);
+			return std::hash<std::string>()(obj->key);
+		}
+	};
 
-  struct CacheDataEqual {
-    bool operator()(const CacheData* lhs, const CacheData* rhs) const {
-      assert(lhs);
-      assert(rhs);
-      return lhs->key == rhs->key;
-    }
-  };
+	struct CacheDataEqual {
+		bool operator()(const CacheData *lhs,
+				const CacheData *rhs) const
+		{
+			assert(lhs);
+			assert(rhs);
+			return lhs->key == rhs->key;
+		}
+	};
 
-  struct Statistics {
-    std::atomic<uint64_t> cache_misses_{0};
-    std::atomic<uint64_t> cache_hits_{0};
-    std::atomic<uint64_t> cache_inserts_{0};
-    std::atomic<uint64_t> cache_evicts_{0};
+	struct Statistics {
+		std::atomic<uint64_t> cache_misses_{ 0 };
+		std::atomic<uint64_t> cache_hits_{ 0 };
+		std::atomic<uint64_t> cache_inserts_{ 0 };
+		std::atomic<uint64_t> cache_evicts_{ 0 };
 
-    double CacheHitPct() const {
-      auto lookups = cache_hits_ + cache_misses_;
-      return lookups ? 100 * cache_hits_ / static_cast<double>(lookups) : 0.0;
-    }
+		double CacheHitPct() const
+		{
+			auto lookups = cache_hits_ + cache_misses_;
+			return lookups ? 100 * cache_hits_ /
+						 static_cast<double>(lookups) :
+					       0.0;
+		}
 
-    double CacheMissPct() const {
-      auto lookups = cache_hits_ + cache_misses_;
-      return lookups ? 100 * cache_misses_ / static_cast<double>(lookups) : 0.0;
-    }
-  };
+		double CacheMissPct() const
+		{
+			auto lookups = cache_hits_ + cache_misses_;
+			return lookups ? 100 * cache_misses_ /
+						 static_cast<double>(lookups) :
+					       0.0;
+		}
+	};
 
-  typedef EvictableHashTable<CacheData, CacheDataHash, CacheDataEqual>
-      IndexType;
+	typedef EvictableHashTable<CacheData, CacheDataHash, CacheDataEqual>
+		IndexType;
 
-  // Evict LRU tail
-  bool Evict();
+	// Evict LRU tail
+	bool Evict();
 
-  const bool is_compressed_ = true;    // does it store compressed data
-  IndexType index_;                    // in-memory cache
-  std::atomic<uint64_t> max_size_{0};  // Maximum size of the cache
-  std::atomic<uint64_t> size_{0};      // Size of the cache
-  Statistics stats_;
+	const bool is_compressed_ = true; // does it store compressed data
+	IndexType index_; // in-memory cache
+	std::atomic<uint64_t> max_size_{ 0 }; // Maximum size of the cache
+	std::atomic<uint64_t> size_{ 0 }; // Size of the cache
+	Statistics stats_;
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
 #endif

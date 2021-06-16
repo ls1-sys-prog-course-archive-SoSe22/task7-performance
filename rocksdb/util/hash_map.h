@@ -12,8 +12,8 @@
 
 #include "util/autovector.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 // This is similar to std::unordered_map, except that it tries to avoid
 // allocating or deallocating memory as much as possible. With
 // std::unordered_map, an allocation/deallocation is made for every insertion
@@ -23,45 +23,51 @@ namespace rocksdb {
 //
 // This implementation uses autovector as hash chains insteads.
 //
-template <typename K, typename V, size_t size = 128>
-class HashMap {
-  std::array<autovector<std::pair<K, V>, 1>, size> table_;
+template <typename K, typename V, size_t size = 128> class HashMap {
+	std::array<autovector<std::pair<K, V>, 1>, size> table_;
 
- public:
-  bool Contains(K key) {
-    auto& bucket = table_[key % size];
-    auto it = std::find_if(
-        bucket.begin(), bucket.end(),
-        [key](const std::pair<K, V>& p) { return p.first == key; });
-    return it != bucket.end();
-  }
+    public:
+	bool Contains(K key)
+	{
+		auto &bucket = table_[key % size];
+		auto it = std::find_if(bucket.begin(), bucket.end(),
+				       [key](const std::pair<K, V> &p) {
+					       return p.first == key;
+				       });
+		return it != bucket.end();
+	}
 
-  void Insert(K key, V value) {
-    auto& bucket = table_[key % size];
-    bucket.push_back({key, value});
-  }
+	void Insert(K key, V value)
+	{
+		auto &bucket = table_[key % size];
+		bucket.push_back({ key, value });
+	}
 
-  void Delete(K key) {
-    auto& bucket = table_[key % size];
-    auto it = std::find_if(
-        bucket.begin(), bucket.end(),
-        [key](const std::pair<K, V>& p) { return p.first == key; });
-    if (it != bucket.end()) {
-      auto last = bucket.end() - 1;
-      if (it != last) {
-        *it = *last;
-      }
-      bucket.pop_back();
-    }
-  }
+	void Delete(K key)
+	{
+		auto &bucket = table_[key % size];
+		auto it = std::find_if(bucket.begin(), bucket.end(),
+				       [key](const std::pair<K, V> &p) {
+					       return p.first == key;
+				       });
+		if (it != bucket.end()) {
+			auto last = bucket.end() - 1;
+			if (it != last) {
+				*it = *last;
+			}
+			bucket.pop_back();
+		}
+	}
 
-  V& Get(K key) {
-    auto& bucket = table_[key % size];
-    auto it = std::find_if(
-        bucket.begin(), bucket.end(),
-        [key](const std::pair<K, V>& p) { return p.first == key; });
-    return it->second;
-  }
+	V &Get(K key)
+	{
+		auto &bucket = table_[key % size];
+		auto it = std::find_if(bucket.begin(), bucket.end(),
+				       [key](const std::pair<K, V> &p) {
+					       return p.first == key;
+				       });
+		return it->second;
+	}
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

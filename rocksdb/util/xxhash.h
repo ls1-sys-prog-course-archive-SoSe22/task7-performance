@@ -59,23 +59,21 @@ It depends on successfully passing SMHasher test set.
 
 #pragma once
 
-#if defined (__cplusplus)
-namespace rocksdb {
+#if defined(__cplusplus)
+namespace rocksdb
+{
 #endif
-
 
 //****************************
 // Type
 //****************************
-typedef enum { XXH_OK=0, XXH_ERROR } XXH_errorcode;
-
-
+typedef enum { XXH_OK = 0, XXH_ERROR } XXH_errorcode;
 
 //****************************
 // Simple Hash Functions
 //****************************
 
-unsigned int XXH32 (const void* input, int len, unsigned int seed);
+unsigned int XXH32(const void *input, int len, unsigned int seed);
 
 /*
 XXH32() :
@@ -88,15 +86,13 @@ XXH32() :
     If your data is larger, use the advanced functions below.
 */
 
-
-
 //****************************
 // Advanced Hash Functions
 //****************************
 
-void*         XXH32_init   (unsigned int seed);
-XXH_errorcode XXH32_update (void* state, const void* input, int len);
-unsigned int  XXH32_digest (void* state);
+void *XXH32_init(unsigned int seed);
+XXH_errorcode XXH32_update(void *state, const void *input, int len);
+unsigned int XXH32_digest(void *state);
 
 /*
 These functions calculate the xxhash of an input provided in several small packets,
@@ -120,12 +116,14 @@ You must provide the same "void* state" parameter created by XXH32_init().
 Memory will be freed by XXH32_digest().
 */
 
+int XXH32_sizeofState();
+XXH_errorcode XXH32_resetState(void *state, unsigned int seed);
 
-int           XXH32_sizeofState();
-XXH_errorcode XXH32_resetState(void* state, unsigned int seed);
-
-#define       XXH32_SIZEOFSTATE 48
-typedef struct { long long ll[(XXH32_SIZEOFSTATE+(sizeof(long long)-1))/sizeof(long long)]; } XXH32_stateSpace_t;
+#define XXH32_SIZEOFSTATE 48
+typedef struct {
+	long long ll[(XXH32_SIZEOFSTATE + (sizeof(long long) - 1)) /
+		     sizeof(long long)];
+} XXH32_stateSpace_t;
 /*
 These functions allow user application to make its own allocation for state.
 
@@ -137,8 +135,7 @@ For static allocation purposes (such as allocation on stack, or freestanding sys
 use the structure XXH32_stateSpace_t, which will ensure that memory space is large enough and correctly aligned to access 'long long' fields.
 */
 
-
-unsigned int XXH32_intermediateDigest (void* state);
+unsigned int XXH32_intermediateDigest(void *state);
 /*
 This function does the same as XXH32_digest(), generating a 32-bit hash,
 but preserve memory context.
@@ -146,19 +143,15 @@ This way, it becomes possible to generate intermediate hashes, and then continue
 To free memory context, use XXH32_digest(), or free().
 */
 
-
-
 //****************************
 // Deprecated function names
 //****************************
 // The following translations are provided to ease code transition
 // You are encouraged to no longer this function names
-#define XXH32_feed   XXH32_update
+#define XXH32_feed XXH32_update
 #define XXH32_result XXH32_digest
 #define XXH32_getIntermediateResult XXH32_intermediateDigest
 
-
-
-#if defined (__cplusplus)
-}  // namespace rocksdb
+#if defined(__cplusplus)
+} // namespace rocksdb
 #endif

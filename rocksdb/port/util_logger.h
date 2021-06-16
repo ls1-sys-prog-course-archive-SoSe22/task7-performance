@@ -20,4 +20,4 @@
 #include "port/win/win_logger.h"
 #endif
 
-#endif  // STORAGE_LEVELDB_PORT_UTIL_LOGGER_H_
+#endif // STORAGE_LEVELDB_PORT_UTIL_LOGGER_H_

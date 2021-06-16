@@ -17,32 +17,33 @@
 #include "rocksdb/merge_operator.h"
 #include "rocksdb/slice.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class StringAppendTESTOperator : public MergeOperator {
- public:
-  // Constructor with delimiter
-  explicit StringAppendTESTOperator(char delim_char);
+    public:
+	// Constructor with delimiter
+	explicit StringAppendTESTOperator(char delim_char);
 
-  virtual bool FullMergeV2(const MergeOperationInput& merge_in,
-                           MergeOperationOutput* merge_out) const override;
+	virtual bool
+	FullMergeV2(const MergeOperationInput &merge_in,
+		    MergeOperationOutput *merge_out) const override;
 
-  virtual bool PartialMergeMulti(const Slice& key,
-                                 const std::deque<Slice>& operand_list,
-                                 std::string* new_value, Logger* logger) const
-      override;
+	virtual bool PartialMergeMulti(const Slice &key,
+				       const std::deque<Slice> &operand_list,
+				       std::string *new_value,
+				       Logger *logger) const override;
 
-  virtual const char* Name() const override;
+	virtual const char *Name() const override;
 
- private:
-  // A version of PartialMerge that actually performs "partial merging".
-  // Use this to simulate the exact behaviour of the StringAppendOperator.
-  bool _AssocPartialMergeMulti(const Slice& key,
-                               const std::deque<Slice>& operand_list,
-                               std::string* new_value, Logger* logger) const;
+    private:
+	// A version of PartialMerge that actually performs "partial merging".
+	// Use this to simulate the exact behaviour of the StringAppendOperator.
+	bool _AssocPartialMergeMulti(const Slice &key,
+				     const std::deque<Slice> &operand_list,
+				     std::string *new_value,
+				     Logger *logger) const;
 
-  char delim_;         // The delimiter is inserted between elements
-
+	char delim_; // The delimiter is inserted between elements
 };
 
 } // namespace rocksdb

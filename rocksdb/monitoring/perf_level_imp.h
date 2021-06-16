@@ -7,12 +7,12 @@
 #include "rocksdb/perf_level.h"
 #include "port/port.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 #ifdef ROCKSDB_SUPPORT_THREAD_LOCAL
 extern __thread PerfLevel perf_level;
 #else
 extern PerfLevel perf_level;
 #endif
 
-}  // namespace rocksdb
+} // namespace rocksdb

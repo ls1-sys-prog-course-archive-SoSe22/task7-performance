@@ -17,44 +17,55 @@
 #include "rocksdb/table.h"
 #include "db/dbformat.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 struct EnvOptions;
 
 using std::unique_ptr;
 class BlockBasedTableBuilder;
 
 class BlockBasedTableFactory : public TableFactory {
- public:
-  explicit BlockBasedTableFactory(
-      const BlockBasedTableOptions& table_options = BlockBasedTableOptions());
+    public:
+	explicit BlockBasedTableFactory(
+		const BlockBasedTableOptions &table_options =
+			BlockBasedTableOptions());
 
-  ~BlockBasedTableFactory() {}
+	~BlockBasedTableFactory()
+	{
+	}
 
-  const char* Name() const override { return "BlockBasedTable"; }
+	const char *Name() const override
+	{
+		return "BlockBasedTable";
+	}
 
-  Status NewTableReader(
-      const TableReaderOptions& table_reader_options,
-      unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
-      unique_ptr<TableReader>* table_reader,
-      bool prefetch_index_and_filter_in_cache = true) const override;
+	Status NewTableReader(
+		const TableReaderOptions &table_reader_options,
+		unique_ptr<RandomAccessFileReader> &&file, uint64_t file_size,
+		unique_ptr<TableReader> *table_reader,
+		bool prefetch_index_and_filter_in_cache = true) const override;
 
-  TableBuilder* NewTableBuilder(
-      const TableBuilderOptions& table_builder_options,
-      uint32_t column_family_id, WritableFileWriter* file) const override;
+	TableBuilder *
+	NewTableBuilder(const TableBuilderOptions &table_builder_options,
+			uint32_t column_family_id,
+			WritableFileWriter *file) const override;
 
-  // Sanitizes the specified DB Options.
-  Status SanitizeOptions(const DBOptions& db_opts,
-                         const ColumnFamilyOptions& cf_opts) const override;
+	// Sanitizes the specified DB Options.
+	Status
+	SanitizeOptions(const DBOptions &db_opts,
+			const ColumnFamilyOptions &cf_opts) const override;
 
-  std::string GetPrintableTableOptions() const override;
+	std::string GetPrintableTableOptions() const override;
 
-  const BlockBasedTableOptions& table_options() const;
+	const BlockBasedTableOptions &table_options() const;
 
-  void* GetOptions() override { return &table_options_; }
+	void *GetOptions() override
+	{
+		return &table_options_;
+	}
 
- private:
-  BlockBasedTableOptions table_options_;
+    private:
+	BlockBasedTableOptions table_options_;
 };
 
 extern const std::string kHashIndexPrefixesBlock;
@@ -62,4 +73,4 @@ extern const std::string kHashIndexPrefixesMetadataBlock;
 extern const std::string kPropTrue;
 extern const std::string kPropFalse;
 
-}  // namespace rocksdb
+} // namespace rocksdb

@@ -22,12 +22,13 @@
  * Signature: (IZ)J
  */
 jlong Java_org_rocksdb_BloomFilter_createNewBloomFilter(
-    JNIEnv* env, jclass jcls, jint bits_per_key,
-    jboolean use_block_base_builder) {
-  auto* sptr_filter =
-      new std::shared_ptr<const rocksdb::FilterPolicy>(
-          rocksdb::NewBloomFilterPolicy(bits_per_key, use_block_base_builder));
-  return reinterpret_cast<jlong>(sptr_filter);
+	JNIEnv *env, jclass jcls, jint bits_per_key,
+	jboolean use_block_base_builder)
+{
+	auto *sptr_filter = new std::shared_ptr<const rocksdb::FilterPolicy>(
+		rocksdb::NewBloomFilterPolicy(bits_per_key,
+					      use_block_base_builder));
+	return reinterpret_cast<jlong>(sptr_filter);
 }
 
 /*
@@ -35,9 +36,11 @@ jlong Java_org_rocksdb_BloomFilter_createNewBloomFilter(
  * Method:    disposeInternal
  * Signature: (J)V
  */
-void Java_org_rocksdb_Filter_disposeInternal(
-    JNIEnv* env, jobject jobj, jlong jhandle) {
-  auto* handle =
-      reinterpret_cast<std::shared_ptr<const rocksdb::FilterPolicy> *>(jhandle);
-  delete handle;  // delete std::shared_ptr
+void Java_org_rocksdb_Filter_disposeInternal(JNIEnv *env, jobject jobj,
+					     jlong jhandle)
+{
+	auto *handle =
+		reinterpret_cast<std::shared_ptr<const rocksdb::FilterPolicy> *>(
+			jhandle);
+	delete handle; // delete std::shared_ptr
 }

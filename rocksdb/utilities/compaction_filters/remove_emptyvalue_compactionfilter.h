@@ -12,16 +12,13 @@
 #include "rocksdb/compaction_filter.h"
 #include "rocksdb/slice.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class RemoveEmptyValueCompactionFilter : public CompactionFilter {
- public:
-    const char* Name() const override;
-    bool Filter(int level,
-        const Slice& key,
-        const Slice& existing_value,
-        std::string* new_value,
-        bool* value_changed) const override;
+    public:
+	const char *Name() const override;
+	bool Filter(int level, const Slice &key, const Slice &existing_value,
+		    std::string *new_value, bool *value_changed) const override;
 };
-}  // namespace rocksdb
-#endif  // !ROCKSDB_LITE
+} // namespace rocksdb
+#endif // !ROCKSDB_LITE

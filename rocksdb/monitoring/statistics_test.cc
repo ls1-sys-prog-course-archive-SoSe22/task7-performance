@@ -10,26 +10,29 @@
 
 #include "rocksdb/statistics.h"
 
-namespace rocksdb {
-
-class StatisticsTest : public testing::Test {};
+namespace rocksdb
+{
+class StatisticsTest : public testing::Test {
+};
 
 // Sanity check to make sure that contents and order of TickersNameMap
 // match Tickers enum
-TEST_F(StatisticsTest, Sanity) {
-  EXPECT_EQ(static_cast<size_t>(Tickers::TICKER_ENUM_MAX),
-            TickersNameMap.size());
+TEST_F(StatisticsTest, Sanity)
+{
+	EXPECT_EQ(static_cast<size_t>(Tickers::TICKER_ENUM_MAX),
+		  TickersNameMap.size());
 
-  for (uint32_t t = 0; t < Tickers::TICKER_ENUM_MAX; t++) {
-    auto pair = TickersNameMap[static_cast<size_t>(t)];
-    ASSERT_EQ(pair.first, t) << "Miss match at " << pair.second;
-  }
+	for (uint32_t t = 0; t < Tickers::TICKER_ENUM_MAX; t++) {
+		auto pair = TickersNameMap[static_cast<size_t>(t)];
+		ASSERT_EQ(pair.first, t) << "Miss match at " << pair.second;
+	}
 }
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-int main(int argc, char** argv) {
-  rocksdb::port::InstallStackTraceHandler();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+int main(int argc, char **argv)
+{
+	rocksdb::port::InstallStackTraceHandler();
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

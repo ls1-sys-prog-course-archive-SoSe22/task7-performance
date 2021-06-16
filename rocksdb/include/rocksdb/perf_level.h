@@ -9,17 +9,18 @@
 #include <stdint.h>
 #include <string>
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 // How much perf stats to collect. Affects perf_context and iostats_context.
 enum PerfLevel : unsigned char {
-  kUninitialized = 0,             // unknown setting
-  kDisable = 1,                   // disable perf stats
-  kEnableCount = 2,               // enable only count stats
-  kEnableTimeExceptForMutex = 3,  // Other than count stats, also enable time
-                                  // stats except for mutexes
-  kEnableTime = 4,                // enable count and time stats
-  kOutOfBounds = 5                // N.B. Must always be the last value!
+	kUninitialized = 0, // unknown setting
+	kDisable = 1, // disable perf stats
+	kEnableCount = 2, // enable only count stats
+	kEnableTimeExceptForMutex =
+		3, // Other than count stats, also enable time
+	// stats except for mutexes
+	kEnableTime = 4, // enable count and time stats
+	kOutOfBounds = 5 // N.B. Must always be the last value!
 };
 
 // set the perf stats level for current thread
@@ -28,6 +29,6 @@ void SetPerfLevel(PerfLevel level);
 // get current perf stats level for current thread
 PerfLevel GetPerfLevel();
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // INCLUDE_ROCKSDB_PERF_LEVEL_H_
+#endif // INCLUDE_ROCKSDB_PERF_LEVEL_H_

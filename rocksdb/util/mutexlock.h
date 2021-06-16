@@ -14,8 +14,8 @@
 #include <thread>
 #include "port/port.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 // Helper class that locks a mutex on construction and unlocks the mutex when
 // the destructor of the MutexLock object is invoked.
 //
@@ -27,17 +27,21 @@ namespace rocksdb {
 //   }
 
 class MutexLock {
- public:
-  explicit MutexLock(port::Mutex *mu) : mu_(mu) {
-    this->mu_->Lock();
-  }
-  ~MutexLock() { this->mu_->Unlock(); }
+    public:
+	explicit MutexLock(port::Mutex *mu) : mu_(mu)
+	{
+		this->mu_->Lock();
+	}
+	~MutexLock()
+	{
+		this->mu_->Unlock();
+	}
 
- private:
-  port::Mutex *const mu_;
-  // No copying allowed
-  MutexLock(const MutexLock&);
-  void operator=(const MutexLock&);
+    private:
+	port::Mutex *const mu_;
+	// No copying allowed
+	MutexLock(const MutexLock &);
+	void operator=(const MutexLock &);
 };
 
 //
@@ -46,32 +50,42 @@ class MutexLock {
 // object goes out of scope.
 //
 class ReadLock {
- public:
-  explicit ReadLock(port::RWMutex *mu) : mu_(mu) {
-    this->mu_->ReadLock();
-  }
-  ~ReadLock() { this->mu_->ReadUnlock(); }
+    public:
+	explicit ReadLock(port::RWMutex *mu) : mu_(mu)
+	{
+		this->mu_->ReadLock();
+	}
+	~ReadLock()
+	{
+		this->mu_->ReadUnlock();
+	}
 
- private:
-  port::RWMutex *const mu_;
-  // No copying allowed
-  ReadLock(const ReadLock&);
-  void operator=(const ReadLock&);
+    private:
+	port::RWMutex *const mu_;
+	// No copying allowed
+	ReadLock(const ReadLock &);
+	void operator=(const ReadLock &);
 };
 
 //
 // Automatically unlock a locked mutex when the object is destroyed
 //
 class ReadUnlock {
- public:
-  explicit ReadUnlock(port::RWMutex *mu) : mu_(mu) { mu->AssertHeld(); }
-  ~ReadUnlock() { mu_->ReadUnlock(); }
+    public:
+	explicit ReadUnlock(port::RWMutex *mu) : mu_(mu)
+	{
+		mu->AssertHeld();
+	}
+	~ReadUnlock()
+	{
+		mu_->ReadUnlock();
+	}
 
- private:
-  port::RWMutex *const mu_;
-  // No copying allowed
-  ReadUnlock(const ReadUnlock &) = delete;
-  ReadUnlock &operator=(const ReadUnlock &) = delete;
+    private:
+	port::RWMutex *const mu_;
+	// No copying allowed
+	ReadUnlock(const ReadUnlock &) = delete;
+	ReadUnlock &operator=(const ReadUnlock &) = delete;
 };
 
 //
@@ -80,17 +94,21 @@ class ReadUnlock {
 // object goes out of scope.
 //
 class WriteLock {
- public:
-  explicit WriteLock(port::RWMutex *mu) : mu_(mu) {
-    this->mu_->WriteLock();
-  }
-  ~WriteLock() { this->mu_->WriteUnlock(); }
+    public:
+	explicit WriteLock(port::RWMutex *mu) : mu_(mu)
+	{
+		this->mu_->WriteLock();
+	}
+	~WriteLock()
+	{
+		this->mu_->WriteUnlock();
+	}
 
- private:
-  port::RWMutex *const mu_;
-  // No copying allowed
-  WriteLock(const WriteLock&);
-  void operator=(const WriteLock&);
+    private:
+	port::RWMutex *const mu_;
+	// No copying allowed
+	WriteLock(const WriteLock &);
+	void operator=(const WriteLock &);
 };
 
 //
@@ -98,34 +116,41 @@ class WriteLock {
 // are chosen so you can use std::unique_lock or std::lock_guard with it.
 //
 class SpinMutex {
- public:
-  SpinMutex() : locked_(false) {}
+    public:
+	SpinMutex() : locked_(false)
+	{
+	}
 
-  bool try_lock() {
-    auto currently_locked = locked_.load(std::memory_order_relaxed);
-    return !currently_locked &&
-           locked_.compare_exchange_weak(currently_locked, true,
-                                         std::memory_order_acquire,
-                                         std::memory_order_relaxed);
-  }
+	bool try_lock()
+	{
+		auto currently_locked = locked_.load(std::memory_order_relaxed);
+		return !currently_locked &&
+		       locked_.compare_exchange_weak(currently_locked, true,
+						     std::memory_order_acquire,
+						     std::memory_order_relaxed);
+	}
 
-  void lock() {
-    for (size_t tries = 0;; ++tries) {
-      if (try_lock()) {
-        // success
-        break;
-      }
-      port::AsmVolatilePause();
-      if (tries > 100) {
-        std::this_thread::yield();
-      }
-    }
-  }
+	void lock()
+	{
+		for (size_t tries = 0;; ++tries) {
+			if (try_lock()) {
+				// success
+				break;
+			}
+			port::AsmVolatilePause();
+			if (tries > 100) {
+				std::this_thread::yield();
+			}
+		}
+	}
 
-  void unlock() { locked_.store(false, std::memory_order_release); }
+	void unlock()
+	{
+		locked_.store(false, std::memory_order_release);
+	}
 
- private:
-  std::atomic<bool> locked_;
+    private:
+	std::atomic<bool> locked_;
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

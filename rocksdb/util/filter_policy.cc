@@ -9,8 +9,10 @@
 
 #include "rocksdb/filter_policy.h"
 
-namespace rocksdb {
+namespace rocksdb
+{
+FilterPolicy::~FilterPolicy()
+{
+}
 
-FilterPolicy::~FilterPolicy() { }
-
-}  // namespace rocksdb
+} // namespace rocksdb

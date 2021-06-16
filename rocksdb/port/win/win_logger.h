@@ -19,45 +19,45 @@
 #include <stdint.h>
 #include <windows.h>
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class Env;
 
-namespace port {
-
+namespace port
+{
 class WinLogger : public rocksdb::Logger {
- public:
-  WinLogger(uint64_t (*gettid)(), Env* env, HANDLE file,
-            const InfoLogLevel log_level = InfoLogLevel::ERROR_LEVEL);
+    public:
+	WinLogger(uint64_t (*gettid)(), Env *env, HANDLE file,
+		  const InfoLogLevel log_level = InfoLogLevel::ERROR_LEVEL);
 
-  virtual ~WinLogger();
+	virtual ~WinLogger();
 
-  WinLogger(const WinLogger&) = delete;
+	WinLogger(const WinLogger &) = delete;
 
-  WinLogger& operator=(const WinLogger&) = delete;
+	WinLogger &operator=(const WinLogger &) = delete;
 
-  void close();
+	void close();
 
-  void Flush() override;
+	void Flush() override;
 
-  using rocksdb::Logger::Logv;
-  void Logv(const char* format, va_list ap) override;
+	using rocksdb::Logger::Logv;
+	void Logv(const char *format, va_list ap) override;
 
-  size_t GetLogFileSize() const override;
+	size_t GetLogFileSize() const override;
 
-  void DebugWriter(const char* str, int len);
+	void DebugWriter(const char *str, int len);
 
- private:
-  HANDLE file_;
-  uint64_t (*gettid_)();  // Return the thread id for the current thread
-  std::atomic_size_t log_size_;
-  std::atomic_uint_fast64_t last_flush_micros_;
-  Env* env_;
-  bool flush_pending_;
+    private:
+	HANDLE file_;
+	uint64_t (*gettid_)(); // Return the thread id for the current thread
+	std::atomic_size_t log_size_;
+	std::atomic_uint_fast64_t last_flush_micros_;
+	Env *env_;
+	bool flush_pending_;
 
-  const static uint64_t flush_every_seconds_ = 5;
+	const static uint64_t flush_every_seconds_ = 5;
 };
 
-}
+} // namespace port
 
-}  // namespace rocksdb
+} // namespace rocksdb

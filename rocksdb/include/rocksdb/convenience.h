@@ -13,8 +13,8 @@
 #include "rocksdb/options.h"
 #include "rocksdb/table.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 #ifndef ROCKSDB_LITE
 // The following set of functions provide a way to construct RocksDB Options
 // from a string or a string-to-string map.  Here're the general rule of
@@ -166,10 +166,10 @@ namespace rocksdb {
 // @return Status::OK() on success.  Otherwise, a non-ok status indicating
 //     error will be returned, and "new_options" will be set to "base_options".
 Status GetColumnFamilyOptionsFromMap(
-    const ColumnFamilyOptions& base_options,
-    const std::unordered_map<std::string, std::string>& opts_map,
-    ColumnFamilyOptions* new_options, bool input_strings_escaped = false,
-    bool ignore_unknown_options = false);
+	const ColumnFamilyOptions &base_options,
+	const std::unordered_map<std::string, std::string> &opts_map,
+	ColumnFamilyOptions *new_options, bool input_strings_escaped = false,
+	bool ignore_unknown_options = false);
 
 // Take a default DBOptions "base_options" in addition to a
 // map "opts_map" of option name to option value to construct the new
@@ -197,10 +197,10 @@ Status GetColumnFamilyOptionsFromMap(
 // @return Status::OK() on success.  Otherwise, a non-ok status indicating
 //     error will be returned, and "new_options" will be set to "base_options".
 Status GetDBOptionsFromMap(
-    const DBOptions& base_options,
-    const std::unordered_map<std::string, std::string>& opts_map,
-    DBOptions* new_options, bool input_strings_escaped = false,
-    bool ignore_unknown_options = false);
+	const DBOptions &base_options,
+	const std::unordered_map<std::string, std::string> &opts_map,
+	DBOptions *new_options, bool input_strings_escaped = false,
+	bool ignore_unknown_options = false);
 
 // Take a default BlockBasedTableOptions "table_options" in addition to a
 // map "opts_map" of option name to option value to construct the new
@@ -241,10 +241,11 @@ Status GetDBOptionsFromMap(
 //     error will be returned, and "new_table_options" will be set to
 //     "table_options".
 Status GetBlockBasedTableOptionsFromMap(
-    const BlockBasedTableOptions& table_options,
-    const std::unordered_map<std::string, std::string>& opts_map,
-    BlockBasedTableOptions* new_table_options,
-    bool input_strings_escaped = false, bool ignore_unknown_options = false);
+	const BlockBasedTableOptions &table_options,
+	const std::unordered_map<std::string, std::string> &opts_map,
+	BlockBasedTableOptions *new_table_options,
+	bool input_strings_escaped = false,
+	bool ignore_unknown_options = false);
 
 // Take a default PlainTableOptions "table_options" in addition to a
 // map "opts_map" of option name to option value to construct the new
@@ -264,10 +265,11 @@ Status GetBlockBasedTableOptionsFromMap(
 //     error will be returned, and "new_table_options" will be set to
 //     "table_options".
 Status GetPlainTableOptionsFromMap(
-    const PlainTableOptions& table_options,
-    const std::unordered_map<std::string, std::string>& opts_map,
-    PlainTableOptions* new_table_options, bool input_strings_escaped = false,
-    bool ignore_unknown_options = false);
+	const PlainTableOptions &table_options,
+	const std::unordered_map<std::string, std::string> &opts_map,
+	PlainTableOptions *new_table_options,
+	bool input_strings_escaped = false,
+	bool ignore_unknown_options = false);
 
 // Take a string representation of option names and  values, apply them into the
 // base_options, and return the new options as a result. The string has the
@@ -277,58 +279,55 @@ Status GetPlainTableOptionsFromMap(
 // BlockBasedTableOptions as part of the string for block-based table factory:
 //   "write_buffer_size=1024;block_based_table_factory={block_size=4k};"
 //   "max_write_buffer_num=2"
-Status GetColumnFamilyOptionsFromString(
-    const ColumnFamilyOptions& base_options,
-    const std::string& opts_str,
-    ColumnFamilyOptions* new_options);
+Status GetColumnFamilyOptionsFromString(const ColumnFamilyOptions &base_options,
+					const std::string &opts_str,
+					ColumnFamilyOptions *new_options);
 
-Status GetDBOptionsFromString(
-    const DBOptions& base_options,
-    const std::string& opts_str,
-    DBOptions* new_options);
+Status GetDBOptionsFromString(const DBOptions &base_options,
+			      const std::string &opts_str,
+			      DBOptions *new_options);
 
-Status GetStringFromDBOptions(std::string* opts_str,
-                              const DBOptions& db_options,
-                              const std::string& delimiter = ";  ");
+Status GetStringFromDBOptions(std::string *opts_str,
+			      const DBOptions &db_options,
+			      const std::string &delimiter = ";  ");
 
-Status GetStringFromColumnFamilyOptions(std::string* opts_str,
-                                        const ColumnFamilyOptions& cf_options,
-                                        const std::string& delimiter = ";  ");
+Status GetStringFromColumnFamilyOptions(std::string *opts_str,
+					const ColumnFamilyOptions &cf_options,
+					const std::string &delimiter = ";  ");
 
-Status GetStringFromCompressionType(std::string* compression_str,
-                                    CompressionType compression_type);
+Status GetStringFromCompressionType(std::string *compression_str,
+				    CompressionType compression_type);
 
 std::vector<CompressionType> GetSupportedCompressions();
 
-Status GetBlockBasedTableOptionsFromString(
-    const BlockBasedTableOptions& table_options,
-    const std::string& opts_str,
-    BlockBasedTableOptions* new_table_options);
+Status
+GetBlockBasedTableOptionsFromString(const BlockBasedTableOptions &table_options,
+				    const std::string &opts_str,
+				    BlockBasedTableOptions *new_table_options);
 
-Status GetPlainTableOptionsFromString(
-    const PlainTableOptions& table_options,
-    const std::string& opts_str,
-    PlainTableOptions* new_table_options);
+Status GetPlainTableOptionsFromString(const PlainTableOptions &table_options,
+				      const std::string &opts_str,
+				      PlainTableOptions *new_table_options);
 
 Status GetMemTableRepFactoryFromString(
-    const std::string& opts_str,
-    std::unique_ptr<MemTableRepFactory>* new_mem_factory);
+	const std::string &opts_str,
+	std::unique_ptr<MemTableRepFactory> *new_mem_factory);
 
-Status GetOptionsFromString(const Options& base_options,
-                            const std::string& opts_str, Options* new_options);
+Status GetOptionsFromString(const Options &base_options,
+			    const std::string &opts_str, Options *new_options);
 
-Status StringToMap(const std::string& opts_str,
-                   std::unordered_map<std::string, std::string>* opts_map);
+Status StringToMap(const std::string &opts_str,
+		   std::unordered_map<std::string, std::string> *opts_map);
 
 // Request stopping background work, if wait is true wait until it's done
-void CancelAllBackgroundWork(DB* db, bool wait = false);
+void CancelAllBackgroundWork(DB *db, bool wait = false);
 
 // Delete files which are entirely in the given range
 // Could leave some keys in the range which are in files which are not
 // entirely in the range.
 // Snapshots before the delete might not see the data in the given range.
-Status DeleteFilesInRange(DB* db, ColumnFamilyHandle* column_family,
-                          const Slice* begin, const Slice* end);
-#endif  // ROCKSDB_LITE
+Status DeleteFilesInRange(DB *db, ColumnFamilyHandle *column_family,
+			  const Slice *begin, const Slice *end);
+#endif // ROCKSDB_LITE
 
-}  // namespace rocksdb
+} // namespace rocksdb

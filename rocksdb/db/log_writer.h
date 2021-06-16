@@ -16,14 +16,14 @@
 #include "rocksdb/slice.h"
 #include "rocksdb/status.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class WritableFileWriter;
 
 using std::unique_ptr;
 
-namespace log {
-
+namespace log
+{
 /**
  * Writer is a general purpose log stream writer. It provides an append-only
  * abstraction for writing data. The details of the how the data is written is
@@ -68,38 +68,48 @@ namespace log {
  * records written by the most recent log writer vs a previous one.
  */
 class Writer {
- public:
-  // Create a writer that will append data to "*dest".
-  // "*dest" must be initially empty.
-  // "*dest" must remain live while this Writer is in use.
-  explicit Writer(unique_ptr<WritableFileWriter>&& dest,
-                  uint64_t log_number, bool recycle_log_files);
-  ~Writer();
+    public:
+	// Create a writer that will append data to "*dest".
+	// "*dest" must be initially empty.
+	// "*dest" must remain live while this Writer is in use.
+	explicit Writer(unique_ptr<WritableFileWriter> &&dest,
+			uint64_t log_number, bool recycle_log_files);
+	~Writer();
 
-  Status AddRecord(const Slice& slice);
+	Status AddRecord(const Slice &slice);
 
-  WritableFileWriter* file() { return dest_.get(); }
-  const WritableFileWriter* file() const { return dest_.get(); }
+	WritableFileWriter *file()
+	{
+		return dest_.get();
+	}
+	const WritableFileWriter *file() const
+	{
+		return dest_.get();
+	}
 
-  uint64_t get_log_number() const { return log_number_; }
+	uint64_t get_log_number() const
+	{
+		return log_number_;
+	}
 
- private:
-  unique_ptr<WritableFileWriter> dest_;
-  size_t block_offset_;       // Current offset in block
-  uint64_t log_number_;
-  bool recycle_log_files_;
+    private:
+	unique_ptr<WritableFileWriter> dest_;
+	size_t block_offset_; // Current offset in block
+	uint64_t log_number_;
+	bool recycle_log_files_;
 
-  // crc32c values for all supported record types.  These are
-  // pre-computed to reduce the overhead of computing the crc of the
-  // record type stored in the header.
-  uint32_t type_crc_[kMaxRecordType + 1];
+	// crc32c values for all supported record types.  These are
+	// pre-computed to reduce the overhead of computing the crc of the
+	// record type stored in the header.
+	uint32_t type_crc_[kMaxRecordType + 1];
 
-  Status EmitPhysicalRecord(RecordType type, const char* ptr, size_t length);
+	Status EmitPhysicalRecord(RecordType type, const char *ptr,
+				  size_t length);
 
-  // No copying allowed
-  Writer(const Writer&);
-  void operator=(const Writer&);
+	// No copying allowed
+	Writer(const Writer &);
+	void operator=(const Writer &);
 };
 
-}  // namespace log
-}  // namespace rocksdb
+} // namespace log
+} // namespace rocksdb

@@ -16,7 +16,8 @@
 #include "rocksdb/options.h"
 #include "rocksdb/status.h"
 
-namespace rocksdb {
+namespace rocksdb
+{
 // Constructs the DBOptions and ColumnFamilyDescriptors by loading the
 // latest RocksDB options file stored in the specified rocksdb database.
 //
@@ -55,23 +56,23 @@ namespace rocksdb {
 //     to the options file itself.
 //
 // @see LoadOptionsFromFile
-Status LoadLatestOptions(const std::string& dbpath, Env* env,
-                         DBOptions* db_options,
-                         std::vector<ColumnFamilyDescriptor>* cf_descs,
-                         bool ignore_unknown_options = false);
+Status LoadLatestOptions(const std::string &dbpath, Env *env,
+			 DBOptions *db_options,
+			 std::vector<ColumnFamilyDescriptor> *cf_descs,
+			 bool ignore_unknown_options = false);
 
 // Similar to LoadLatestOptions, this function constructs the DBOptions
 // and ColumnFamilyDescriptors based on the specified RocksDB Options file.
 //
 // @see LoadLatestOptions
-Status LoadOptionsFromFile(const std::string& options_file_name, Env* env,
-                           DBOptions* db_options,
-                           std::vector<ColumnFamilyDescriptor>* cf_descs,
-                           bool ignore_unknown_options = false);
+Status LoadOptionsFromFile(const std::string &options_file_name, Env *env,
+			   DBOptions *db_options,
+			   std::vector<ColumnFamilyDescriptor> *cf_descs,
+			   bool ignore_unknown_options = false);
 
 // Returns the latest options file name under the specified db path.
-Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
-                                std::string* options_file_name);
+Status GetLatestOptionsFileName(const std::string &dbpath, Env *env,
+				std::string *options_file_name);
 
 // Returns Status::OK if the input DBOptions and ColumnFamilyDescriptors
 // are compatible with the latest options stored in the specified DB path.
@@ -84,10 +85,11 @@ Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
 // * prefix_extractor
 // * table_factory
 // * merge_operator
-Status CheckOptionsCompatibility(
-    const std::string& dbpath, Env* env, const DBOptions& db_options,
-    const std::vector<ColumnFamilyDescriptor>& cf_descs,
-    bool ignore_unknown_options = false);
+Status
+CheckOptionsCompatibility(const std::string &dbpath, Env *env,
+			  const DBOptions &db_options,
+			  const std::vector<ColumnFamilyDescriptor> &cf_descs,
+			  bool ignore_unknown_options = false);
 
-}  // namespace rocksdb
-#endif  // !ROCKSDB_LITE
+} // namespace rocksdb
+#endif // !ROCKSDB_LITE

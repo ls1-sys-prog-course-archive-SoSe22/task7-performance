@@ -20,19 +20,22 @@
 #define STORAGE_DECL static
 #endif
 
-namespace rocksdb {
+namespace rocksdb
+{
+Random *Random::GetTLSInstance()
+{
+	STORAGE_DECL Random *tls_instance;
+	STORAGE_DECL std::aligned_storage<sizeof(Random)>::type
+		tls_instance_bytes;
 
-Random* Random::GetTLSInstance() {
-  STORAGE_DECL Random* tls_instance;
-  STORAGE_DECL std::aligned_storage<sizeof(Random)>::type tls_instance_bytes;
-
-  auto rv = tls_instance;
-  if (UNLIKELY(rv == nullptr)) {
-    size_t seed = std::hash<std::thread::id>()(std::this_thread::get_id());
-    rv = new (&tls_instance_bytes) Random((uint32_t)seed);
-    tls_instance = rv;
-  }
-  return rv;
+	auto rv = tls_instance;
+	if (UNLIKELY(rv == nullptr)) {
+		size_t seed = std::hash<std::thread::id>()(
+			std::this_thread::get_id());
+		rv = new (&tls_instance_bytes) Random((uint32_t)seed);
+		tls_instance = rv;
+	}
+	return rv;
 }
 
-}  // namespace rocksdb
+} // namespace rocksdb

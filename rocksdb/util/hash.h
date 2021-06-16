@@ -15,21 +15,26 @@
 
 #include "rocksdb/slice.h"
 
-namespace rocksdb {
+namespace rocksdb
+{
+extern uint32_t Hash(const char *data, size_t n, uint32_t seed);
 
-extern uint32_t Hash(const char* data, size_t n, uint32_t seed);
-
-inline uint32_t BloomHash(const Slice& key) {
-  return Hash(key.data(), key.size(), 0xbc9f1d34);
+inline uint32_t BloomHash(const Slice &key)
+{
+	return Hash(key.data(), key.size(), 0xbc9f1d34);
 }
 
-inline uint32_t GetSliceHash(const Slice& s) {
-  return Hash(s.data(), s.size(), 397);
+inline uint32_t GetSliceHash(const Slice &s)
+{
+	return Hash(s.data(), s.size(), 397);
 }
 
 // std::hash compatible interface.
 struct SliceHasher {
-  uint32_t operator()(const Slice& s) const { return GetSliceHash(s); }
+	uint32_t operator()(const Slice &s) const
+	{
+		return GetSliceHash(s);
+	}
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

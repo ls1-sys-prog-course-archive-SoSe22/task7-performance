@@ -19,79 +19,85 @@
 #include "table/index_builder.h"
 #include "util/autovector.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class PartitionedFilterBlockBuilder : public FullFilterBlockBuilder {
- public:
-  explicit PartitionedFilterBlockBuilder(
-      const SliceTransform* prefix_extractor, bool whole_key_filtering,
-      FilterBitsBuilder* filter_bits_builder, int index_block_restart_interval,
-      PartitionedIndexBuilder* const p_index_builder);
+    public:
+	explicit PartitionedFilterBlockBuilder(
+		const SliceTransform *prefix_extractor,
+		bool whole_key_filtering,
+		FilterBitsBuilder *filter_bits_builder,
+		int index_block_restart_interval,
+		PartitionedIndexBuilder *const p_index_builder);
 
-  virtual ~PartitionedFilterBlockBuilder();
+	virtual ~PartitionedFilterBlockBuilder();
 
-  void AddKey(const Slice& key) override;
+	void AddKey(const Slice &key) override;
 
-  virtual Slice Finish(const BlockHandle& last_partition_block_handle,
-                       Status* status) override;
+	virtual Slice Finish(const BlockHandle &last_partition_block_handle,
+			     Status *status) override;
 
- private:
-  // Filter data
-  BlockBuilder index_on_filter_block_builder_;  // top-level index builder
-  struct FilterEntry {
-    std::string key;
-    Slice filter;
-  };
-  std::list<FilterEntry> filters;  // list of partitioned indexes and their keys
-  std::unique_ptr<IndexBuilder> value;
-  std::vector<std::unique_ptr<const char[]>> filter_gc;
-  bool finishing_filters =
-      false;  // true if Finish is called once but not complete yet.
-  // The policy of when cut a filter block and Finish it
-  void MaybeCutAFilterBlock();
-  PartitionedIndexBuilder* const p_index_builder_;
+    private:
+	// Filter data
+	BlockBuilder index_on_filter_block_builder_; // top-level index builder
+	struct FilterEntry {
+		std::string key;
+		Slice filter;
+	};
+	std::list<FilterEntry>
+		filters; // list of partitioned indexes and their keys
+	std::unique_ptr<IndexBuilder> value;
+	std::vector<std::unique_ptr<const char[]> > filter_gc;
+	bool finishing_filters =
+		false; // true if Finish is called once but not complete yet.
+	// The policy of when cut a filter block and Finish it
+	void MaybeCutAFilterBlock();
+	PartitionedIndexBuilder *const p_index_builder_;
 };
 
 class PartitionedFilterBlockReader : public FilterBlockReader {
- public:
-  explicit PartitionedFilterBlockReader(const SliceTransform* prefix_extractor,
-                                        bool whole_key_filtering,
-                                        BlockContents&& contents,
-                                        FilterBitsReader* filter_bits_reader,
-                                        Statistics* stats,
-                                        const Comparator& comparator,
-                                        const BlockBasedTable* table);
-  virtual ~PartitionedFilterBlockReader();
+    public:
+	explicit PartitionedFilterBlockReader(
+		const SliceTransform *prefix_extractor,
+		bool whole_key_filtering, BlockContents &&contents,
+		FilterBitsReader *filter_bits_reader, Statistics *stats,
+		const Comparator &comparator, const BlockBasedTable *table);
+	virtual ~PartitionedFilterBlockReader();
 
-  virtual bool IsBlockBased() override { return false; }
-  virtual bool KeyMayMatch(
-      const Slice& key, uint64_t block_offset = kNotValid,
-      const bool no_io = false,
-      const Slice* const const_ikey_ptr = nullptr) override;
-  virtual bool PrefixMayMatch(
-      const Slice& prefix, uint64_t block_offset = kNotValid,
-      const bool no_io = false,
-      const Slice* const const_ikey_ptr = nullptr) override;
-  virtual size_t ApproximateMemoryUsage() const override;
+	virtual bool IsBlockBased() override
+	{
+		return false;
+	}
+	virtual bool
+	KeyMayMatch(const Slice &key, uint64_t block_offset = kNotValid,
+		    const bool no_io = false,
+		    const Slice *const const_ikey_ptr = nullptr) override;
+	virtual bool
+	PrefixMayMatch(const Slice &prefix, uint64_t block_offset = kNotValid,
+		       const bool no_io = false,
+		       const Slice *const const_ikey_ptr = nullptr) override;
+	virtual size_t ApproximateMemoryUsage() const override;
 
- private:
-  Slice GetFilterPartitionHandle(const Slice& entry);
-  BlockBasedTable::CachableEntry<FilterBlockReader> GetFilterPartition(
-      Slice* handle, const bool no_io, bool* cached);
+    private:
+	Slice GetFilterPartitionHandle(const Slice &entry);
+	BlockBasedTable::CachableEntry<FilterBlockReader>
+	GetFilterPartition(Slice *handle, const bool no_io, bool *cached);
 
-  const SliceTransform* prefix_extractor_;
-  std::unique_ptr<Block> idx_on_fltr_blk_;
-  const Comparator& comparator_;
-  const BlockBasedTable* table_;
-  std::unordered_map<uint64_t, FilterBlockReader*> filter_cache_;
-  autovector<Cache::Handle*> handle_list_;
-  struct BlockHandleCmp {
-    bool operator()(const BlockHandle& lhs, const BlockHandle& rhs) const {
-      return lhs.offset() < rhs.offset();
-    }
-  };
-  std::set<BlockHandle, BlockHandleCmp> filter_block_set_;
-  port::RWMutex mu_;
+	const SliceTransform *prefix_extractor_;
+	std::unique_ptr<Block> idx_on_fltr_blk_;
+	const Comparator &comparator_;
+	const BlockBasedTable *table_;
+	std::unordered_map<uint64_t, FilterBlockReader *> filter_cache_;
+	autovector<Cache::Handle *> handle_list_;
+	struct BlockHandleCmp {
+		bool operator()(const BlockHandle &lhs,
+				const BlockHandle &rhs) const
+		{
+			return lhs.offset() < rhs.offset();
+		}
+	};
+	std::set<BlockHandle, BlockHandleCmp> filter_block_set_;
+	port::RWMutex mu_;
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

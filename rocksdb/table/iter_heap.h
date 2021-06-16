@@ -9,34 +9,42 @@
 #include "rocksdb/comparator.h"
 #include "table/iterator_wrapper.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 // When used with std::priority_queue, this comparison functor puts the
 // iterator with the max/largest key on top.
 class MaxIteratorComparator {
- public:
-  MaxIteratorComparator(const Comparator* comparator) :
-    comparator_(comparator) {}
+    public:
+	MaxIteratorComparator(const Comparator *comparator)
+		: comparator_(comparator)
+	{
+	}
 
-  bool operator()(IteratorWrapper* a, IteratorWrapper* b) const {
-    return comparator_->Compare(a->key(), b->key()) < 0;
-  }
- private:
-  const Comparator* comparator_;
+	bool operator()(IteratorWrapper *a, IteratorWrapper *b) const
+	{
+		return comparator_->Compare(a->key(), b->key()) < 0;
+	}
+
+    private:
+	const Comparator *comparator_;
 };
 
 // When used with std::priority_queue, this comparison functor puts the
 // iterator with the min/smallest key on top.
 class MinIteratorComparator {
- public:
-  MinIteratorComparator(const Comparator* comparator) :
-    comparator_(comparator) {}
+    public:
+	MinIteratorComparator(const Comparator *comparator)
+		: comparator_(comparator)
+	{
+	}
 
-  bool operator()(IteratorWrapper* a, IteratorWrapper* b) const {
-    return comparator_->Compare(a->key(), b->key()) > 0;
-  }
- private:
-  const Comparator* comparator_;
+	bool operator()(IteratorWrapper *a, IteratorWrapper *b) const
+	{
+		return comparator_->Compare(a->key(), b->key()) > 0;
+	}
+
+    private:
+	const Comparator *comparator_;
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

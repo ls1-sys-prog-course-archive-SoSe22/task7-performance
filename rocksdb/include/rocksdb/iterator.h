@@ -24,86 +24,92 @@
 #include "rocksdb/slice.h"
 #include "rocksdb/status.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class Iterator : public Cleanable {
- public:
-  Iterator() {}
-  virtual ~Iterator() {}
+    public:
+	Iterator()
+	{
+	}
+	virtual ~Iterator()
+	{
+	}
 
-  // An iterator is either positioned at a key/value pair, or
-  // not valid.  This method returns true iff the iterator is valid.
-  virtual bool Valid() const = 0;
+	// An iterator is either positioned at a key/value pair, or
+	// not valid.  This method returns true iff the iterator is valid.
+	virtual bool Valid() const = 0;
 
-  // Position at the first key in the source.  The iterator is Valid()
-  // after this call iff the source is not empty.
-  virtual void SeekToFirst() = 0;
+	// Position at the first key in the source.  The iterator is Valid()
+	// after this call iff the source is not empty.
+	virtual void SeekToFirst() = 0;
 
-  // Position at the last key in the source.  The iterator is
-  // Valid() after this call iff the source is not empty.
-  virtual void SeekToLast() = 0;
+	// Position at the last key in the source.  The iterator is
+	// Valid() after this call iff the source is not empty.
+	virtual void SeekToLast() = 0;
 
-  // Position at the first key in the source that at or past target
-  // The iterator is Valid() after this call iff the source contains
-  // an entry that comes at or past target.
-  virtual void Seek(const Slice& target) = 0;
+	// Position at the first key in the source that at or past target
+	// The iterator is Valid() after this call iff the source contains
+	// an entry that comes at or past target.
+	virtual void Seek(const Slice &target) = 0;
 
-  // Position at the last key in the source that at or before target
-  // The iterator is Valid() after this call iff the source contains
-  // an entry that comes at or before target.
-  virtual void SeekForPrev(const Slice& target) {}
+	// Position at the last key in the source that at or before target
+	// The iterator is Valid() after this call iff the source contains
+	// an entry that comes at or before target.
+	virtual void SeekForPrev(const Slice &target)
+	{
+	}
 
-  // Moves to the next entry in the source.  After this call, Valid() is
-  // true iff the iterator was not positioned at the last entry in the source.
-  // REQUIRES: Valid()
-  virtual void Next() = 0;
+	// Moves to the next entry in the source.  After this call, Valid() is
+	// true iff the iterator was not positioned at the last entry in the source.
+	// REQUIRES: Valid()
+	virtual void Next() = 0;
 
-  // Moves to the previous entry in the source.  After this call, Valid() is
-  // true iff the iterator was not positioned at the first entry in source.
-  // REQUIRES: Valid()
-  virtual void Prev() = 0;
+	// Moves to the previous entry in the source.  After this call, Valid() is
+	// true iff the iterator was not positioned at the first entry in source.
+	// REQUIRES: Valid()
+	virtual void Prev() = 0;
 
-  // Return the key for the current entry.  The underlying storage for
-  // the returned slice is valid only until the next modification of
-  // the iterator.
-  // REQUIRES: Valid()
-  virtual Slice key() const = 0;
+	// Return the key for the current entry.  The underlying storage for
+	// the returned slice is valid only until the next modification of
+	// the iterator.
+	// REQUIRES: Valid()
+	virtual Slice key() const = 0;
 
-  // Return the value for the current entry.  The underlying storage for
-  // the returned slice is valid only until the next modification of
-  // the iterator.
-  // REQUIRES: !AtEnd() && !AtStart()
-  virtual Slice value() const = 0;
+	// Return the value for the current entry.  The underlying storage for
+	// the returned slice is valid only until the next modification of
+	// the iterator.
+	// REQUIRES: !AtEnd() && !AtStart()
+	virtual Slice value() const = 0;
 
-  // If an error has occurred, return it.  Else return an ok status.
-  // If non-blocking IO is requested and this operation cannot be
-  // satisfied without doing some IO, then this returns Status::Incomplete().
-  virtual Status status() const = 0;
+	// If an error has occurred, return it.  Else return an ok status.
+	// If non-blocking IO is requested and this operation cannot be
+	// satisfied without doing some IO, then this returns Status::Incomplete().
+	virtual Status status() const = 0;
 
-  // Property "rocksdb.iterator.is-key-pinned":
-  //   If returning "1", this means that the Slice returned by key() is valid
-  //   as long as the iterator is not deleted.
-  //   It is guaranteed to always return "1" if
-  //      - Iterator created with ReadOptions::pin_data = true
-  //      - DB tables were created with
-  //        BlockBasedTableOptions::use_delta_encoding = false.
-  // Property "rocksdb.iterator.super-version-number":
-  //   LSM version used by the iterator. The same format as DB Property
-  //   kCurrentSuperVersionNumber. See its comment for more information.
-  virtual Status GetProperty(std::string prop_name, std::string* prop);
+	// Property "rocksdb.iterator.is-key-pinned":
+	//   If returning "1", this means that the Slice returned by key() is valid
+	//   as long as the iterator is not deleted.
+	//   It is guaranteed to always return "1" if
+	//      - Iterator created with ReadOptions::pin_data = true
+	//      - DB tables were created with
+	//        BlockBasedTableOptions::use_delta_encoding = false.
+	// Property "rocksdb.iterator.super-version-number":
+	//   LSM version used by the iterator. The same format as DB Property
+	//   kCurrentSuperVersionNumber. See its comment for more information.
+	virtual Status GetProperty(std::string prop_name, std::string *prop);
 
- private:
-  // No copying allowed
-  Iterator(const Iterator&);
-  void operator=(const Iterator&);
+    private:
+	// No copying allowed
+	Iterator(const Iterator &);
+	void operator=(const Iterator &);
 };
 
 // Return an empty iterator (yields nothing).
-extern Iterator* NewEmptyIterator();
+extern Iterator *NewEmptyIterator();
 
 // Return an empty iterator with the specified status.
-extern Iterator* NewErrorIterator(const Status& status);
+extern Iterator *NewErrorIterator(const Status &status);
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // STORAGE_ROCKSDB_INCLUDE_ITERATOR_H_
+#endif // STORAGE_ROCKSDB_INCLUDE_ITERATOR_H_

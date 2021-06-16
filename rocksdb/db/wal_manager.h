@@ -25,71 +25,76 @@
 #include "rocksdb/transaction_log.h"
 #include "rocksdb/types.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 #ifndef ROCKSDB_LITE
 class WalManager {
- public:
-  WalManager(const ImmutableDBOptions& db_options,
-             const EnvOptions& env_options)
-      : db_options_(db_options),
-        env_options_(env_options),
-        env_(db_options.env),
-        purge_wal_files_last_run_(0) {}
+    public:
+	WalManager(const ImmutableDBOptions &db_options,
+		   const EnvOptions &env_options)
+		: db_options_(db_options), env_options_(env_options),
+		  env_(db_options.env), purge_wal_files_last_run_(0)
+	{
+	}
 
-  Status GetSortedWalFiles(VectorLogPtr& files);
+	Status GetSortedWalFiles(VectorLogPtr &files);
 
-  Status GetUpdatesSince(
-      SequenceNumber seq_number, std::unique_ptr<TransactionLogIterator>* iter,
-      const TransactionLogIterator::ReadOptions& read_options,
-      VersionSet* version_set);
+	Status
+	GetUpdatesSince(SequenceNumber seq_number,
+			std::unique_ptr<TransactionLogIterator> *iter,
+			const TransactionLogIterator::ReadOptions &read_options,
+			VersionSet *version_set);
 
-  void PurgeObsoleteWALFiles();
+	void PurgeObsoleteWALFiles();
 
-  void ArchiveWALFile(const std::string& fname, uint64_t number);
+	void ArchiveWALFile(const std::string &fname, uint64_t number);
 
-  Status TEST_ReadFirstRecord(const WalFileType type, const uint64_t number,
-                              SequenceNumber* sequence) {
-    return ReadFirstRecord(type, number, sequence);
-  }
+	Status TEST_ReadFirstRecord(const WalFileType type,
+				    const uint64_t number,
+				    SequenceNumber *sequence)
+	{
+		return ReadFirstRecord(type, number, sequence);
+	}
 
-  Status TEST_ReadFirstLine(const std::string& fname, const uint64_t number,
-                            SequenceNumber* sequence) {
-    return ReadFirstLine(fname, number, sequence);
-  }
+	Status TEST_ReadFirstLine(const std::string &fname,
+				  const uint64_t number,
+				  SequenceNumber *sequence)
+	{
+		return ReadFirstLine(fname, number, sequence);
+	}
 
- private:
-  Status GetSortedWalsOfType(const std::string& path, VectorLogPtr& log_files,
-                             WalFileType type);
-  // Requires: all_logs should be sorted with earliest log file first
-  // Retains all log files in all_logs which contain updates with seq no.
-  // Greater Than or Equal to the requested SequenceNumber.
-  Status RetainProbableWalFiles(VectorLogPtr& all_logs,
-                                const SequenceNumber target);
+    private:
+	Status GetSortedWalsOfType(const std::string &path,
+				   VectorLogPtr &log_files, WalFileType type);
+	// Requires: all_logs should be sorted with earliest log file first
+	// Retains all log files in all_logs which contain updates with seq no.
+	// Greater Than or Equal to the requested SequenceNumber.
+	Status RetainProbableWalFiles(VectorLogPtr &all_logs,
+				      const SequenceNumber target);
 
-  Status ReadFirstRecord(const WalFileType type, const uint64_t number,
-                         SequenceNumber* sequence);
+	Status ReadFirstRecord(const WalFileType type, const uint64_t number,
+			       SequenceNumber *sequence);
 
-  Status ReadFirstLine(const std::string& fname, const uint64_t number,
-                       SequenceNumber* sequence);
+	Status ReadFirstLine(const std::string &fname, const uint64_t number,
+			     SequenceNumber *sequence);
 
-  // ------- state from DBImpl ------
-  const ImmutableDBOptions& db_options_;
-  const EnvOptions& env_options_;
-  Env* env_;
+	// ------- state from DBImpl ------
+	const ImmutableDBOptions &db_options_;
+	const EnvOptions &env_options_;
+	Env *env_;
 
-  // ------- WalManager state -------
-  // cache for ReadFirstRecord() calls
-  std::unordered_map<uint64_t, SequenceNumber> read_first_record_cache_;
-  port::Mutex read_first_record_cache_mutex_;
+	// ------- WalManager state -------
+	// cache for ReadFirstRecord() calls
+	std::unordered_map<uint64_t, SequenceNumber> read_first_record_cache_;
+	port::Mutex read_first_record_cache_mutex_;
 
-  // last time when PurgeObsoleteWALFiles ran.
-  uint64_t purge_wal_files_last_run_;
+	// last time when PurgeObsoleteWALFiles ran.
+	uint64_t purge_wal_files_last_run_;
 
-  // obsolete files will be deleted every this seconds if ttl deletion is
-  // enabled and archive size_limit is disabled.
-  static const uint64_t kDefaultIntervalToDeleteObsoleteWAL = 600;
+	// obsolete files will be deleted every this seconds if ttl deletion is
+	// enabled and archive size_limit is disabled.
+	static const uint64_t kDefaultIntervalToDeleteObsoleteWAL = 600;
 };
 
-#endif  // ROCKSDB_LITE
-}  // namespace rocksdb
+#endif // ROCKSDB_LITE
+} // namespace rocksdb

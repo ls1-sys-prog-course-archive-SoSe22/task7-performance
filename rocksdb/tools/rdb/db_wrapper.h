@@ -16,43 +16,44 @@ using namespace v8;
 // a mapping from a JavaScript object to a C++ code that can use the RocksDB
 // API.
 class DBWrapper : public node::ObjectWrap {
-  public:
-    static void Init(Handle<Object> exports);
+    public:
+	static void Init(Handle<Object> exports);
 
-  private:
-    explicit DBWrapper();
-    ~DBWrapper();
+    private:
+	explicit DBWrapper();
+	~DBWrapper();
 
-    // Helper methods
-    static bool HasFamilyNamed(std::string& name, DBWrapper* db);
-    static bool AddToBatch(rocksdb::WriteBatch& batch, bool del,
-        Handle<Array> array);
-    static bool AddToBatch(rocksdb::WriteBatch& batch, bool del,
-        Handle<Array> array, DBWrapper* db_wrapper, std::string cf);
-    static Handle<Value> CompactRangeDefault(const v8::Arguments& args);
-    static Handle<Value> CompactColumnFamily(const Arguments& args);
-    static Handle<Value> CompactOptions(const Arguments& args);
-    static Handle<Value> CompactAll(const Arguments& args);
+	// Helper methods
+	static bool HasFamilyNamed(std::string &name, DBWrapper *db);
+	static bool AddToBatch(rocksdb::WriteBatch &batch, bool del,
+			       Handle<Array> array);
+	static bool AddToBatch(rocksdb::WriteBatch &batch, bool del,
+			       Handle<Array> array, DBWrapper *db_wrapper,
+			       std::string cf);
+	static Handle<Value> CompactRangeDefault(const v8::Arguments &args);
+	static Handle<Value> CompactColumnFamily(const Arguments &args);
+	static Handle<Value> CompactOptions(const Arguments &args);
+	static Handle<Value> CompactAll(const Arguments &args);
 
-    // C++ mappings of API methods
-    static Persistent<v8::Function> constructor;
-    static Handle<Value> Open(const Arguments& args);
-    static Handle<Value> New(const Arguments& args);
-    static Handle<Value> Get(const Arguments& args);
-    static Handle<Value> Put(const Arguments& args);
-    static Handle<Value> Delete(const Arguments& args);
-    static Handle<Value> Dump(const Arguments& args);
-    static Handle<Value> WriteBatch(const Arguments& args);
-    static Handle<Value> CreateColumnFamily(const Arguments& args);
-    static Handle<Value> CompactRange(const Arguments& args);
-    static Handle<Value> Close(const Arguments& args);
+	// C++ mappings of API methods
+	static Persistent<v8::Function> constructor;
+	static Handle<Value> Open(const Arguments &args);
+	static Handle<Value> New(const Arguments &args);
+	static Handle<Value> Get(const Arguments &args);
+	static Handle<Value> Put(const Arguments &args);
+	static Handle<Value> Delete(const Arguments &args);
+	static Handle<Value> Dump(const Arguments &args);
+	static Handle<Value> WriteBatch(const Arguments &args);
+	static Handle<Value> CreateColumnFamily(const Arguments &args);
+	static Handle<Value> CompactRange(const Arguments &args);
+	static Handle<Value> Close(const Arguments &args);
 
-    // Internal fields
-    rocksdb::Options options_;
-    rocksdb::Status status_;
-    rocksdb::DB* db_;
-    std::unordered_map<std::string, rocksdb::ColumnFamilyHandle*>
-        columnFamilies_;
+	// Internal fields
+	rocksdb::Options options_;
+	rocksdb::Status status_;
+	rocksdb::DB *db_;
+	std::unordered_map<std::string, rocksdb::ColumnFamilyHandle *>
+		columnFamilies_;
 };
 
 #endif

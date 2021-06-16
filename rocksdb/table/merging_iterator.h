@@ -11,8 +11,8 @@
 
 #include "rocksdb/types.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class Comparator;
 class InternalIterator;
 class Env;
@@ -26,37 +26,43 @@ class Arena;
 // key is present in K child iterators, it will be yielded K times.
 //
 // REQUIRES: n >= 0
-extern InternalIterator* NewMergingIterator(const Comparator* comparator,
-                                            InternalIterator** children, int n,
-                                            Arena* arena = nullptr,
-                                            bool prefix_seek_mode = false);
+extern InternalIterator *NewMergingIterator(const Comparator *comparator,
+					    InternalIterator **children, int n,
+					    Arena *arena = nullptr,
+					    bool prefix_seek_mode = false);
 
 class MergingIterator;
 
 // A builder class to build a merging iterator by adding iterators one by one.
 class MergeIteratorBuilder {
- public:
-  // comparator: the comparator used in merging comparator
-  // arena: where the merging iterator needs to be allocated from.
-  explicit MergeIteratorBuilder(const Comparator* comparator, Arena* arena,
-                                bool prefix_seek_mode = false);
-  ~MergeIteratorBuilder() {}
+    public:
+	// comparator: the comparator used in merging comparator
+	// arena: where the merging iterator needs to be allocated from.
+	explicit MergeIteratorBuilder(const Comparator *comparator,
+				      Arena *arena,
+				      bool prefix_seek_mode = false);
+	~MergeIteratorBuilder()
+	{
+	}
 
-  // Add iter to the merging iterator.
-  void AddIterator(InternalIterator* iter);
+	// Add iter to the merging iterator.
+	void AddIterator(InternalIterator *iter);
 
-  // Get arena used to build the merging iterator. It is called one a child
-  // iterator needs to be allocated.
-  Arena* GetArena() { return arena; }
+	// Get arena used to build the merging iterator. It is called one a child
+	// iterator needs to be allocated.
+	Arena *GetArena()
+	{
+		return arena;
+	}
 
-  // Return the result merging iterator.
-  InternalIterator* Finish();
+	// Return the result merging iterator.
+	InternalIterator *Finish();
 
- private:
-  MergingIterator* merge_iter;
-  InternalIterator* first_iter;
-  bool use_merging_iter;
-  Arena* arena;
+    private:
+	MergingIterator *merge_iter;
+	InternalIterator *first_iter;
+	bool use_merging_iter;
+	Arena *arena;
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

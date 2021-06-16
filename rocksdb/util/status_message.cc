@@ -5,17 +5,17 @@
 
 #include "rocksdb/status.h"
 
-namespace rocksdb {
-
-const char* Status::msgs[] = {
-    "",                                                   // kNone
-    "Timeout Acquiring Mutex",                            // kMutexTimeout
-    "Timeout waiting to lock key",                        // kLockTimeout
-    "Failed to acquire lock due to max_num_locks limit",  // kLockLimit
-    "No space left on device",                            // kNoSpace
-    "Deadlock",                                           // kDeadlock
-    "Stale file handle",                                  // kStaleFile
-    "Memory limit reached"                                // kMemoryLimit
+namespace rocksdb
+{
+const char *Status::msgs[] = {
+	"", // kNone
+	"Timeout Acquiring Mutex", // kMutexTimeout
+	"Timeout waiting to lock key", // kLockTimeout
+	"Failed to acquire lock due to max_num_locks limit", // kLockLimit
+	"No space left on device", // kNoSpace
+	"Deadlock", // kDeadlock
+	"Stale file handle", // kStaleFile
+	"Memory limit reached" // kMemoryLimit
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

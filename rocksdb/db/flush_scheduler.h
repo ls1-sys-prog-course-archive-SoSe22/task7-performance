@@ -10,39 +10,41 @@
 #include <mutex>
 #include <set>
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class ColumnFamilyData;
 
 // Unless otherwise noted, all methods on FlushScheduler should be called
 // only with the DB mutex held or from a single-threaded recovery context.
 class FlushScheduler {
- public:
-  FlushScheduler() : head_(nullptr) {}
+    public:
+	FlushScheduler() : head_(nullptr)
+	{
+	}
 
-  // May be called from multiple threads at once, but not concurrent with
-  // any other method calls on this instance
-  void ScheduleFlush(ColumnFamilyData* cfd);
+	// May be called from multiple threads at once, but not concurrent with
+	// any other method calls on this instance
+	void ScheduleFlush(ColumnFamilyData *cfd);
 
-  // Removes and returns Ref()-ed column family. Client needs to Unref().
-  // Filters column families that have been dropped.
-  ColumnFamilyData* TakeNextColumnFamily();
+	// Removes and returns Ref()-ed column family. Client needs to Unref().
+	// Filters column families that have been dropped.
+	ColumnFamilyData *TakeNextColumnFamily();
 
-  bool Empty();
+	bool Empty();
 
-  void Clear();
+	void Clear();
 
- private:
-  struct Node {
-    ColumnFamilyData* column_family;
-    Node* next;
-  };
+    private:
+	struct Node {
+		ColumnFamilyData *column_family;
+		Node *next;
+	};
 
-  std::atomic<Node*> head_;
+	std::atomic<Node *> head_;
 #ifndef NDEBUG
-  std::mutex checking_mutex_;
-  std::set<ColumnFamilyData*> checking_set_;
-#endif  // NDEBUG
+	std::mutex checking_mutex_;
+	std::set<ColumnFamilyData *> checking_set_;
+#endif // NDEBUG
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

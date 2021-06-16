@@ -13,10 +13,10 @@
 
 #include <string>
 
-namespace rocksdb {
-
-void DumpMallocStats(std::string*);
+namespace rocksdb
+{
+void DumpMallocStats(std::string *);
 
 }
 
-#endif  // !ROCKSDB_LITE
+#endif // !ROCKSDB_LITE

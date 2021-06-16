@@ -12,33 +12,41 @@
 #include "rocksdb/slice_transform.h"
 #include "rocksdb/memtablerep.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class HashCuckooRepFactory : public MemTableRepFactory {
- public:
-  // maxinum number of hash functions used in the cuckoo hash.
-  static const unsigned int kMaxHashCount = 10;
+    public:
+	// maxinum number of hash functions used in the cuckoo hash.
+	static const unsigned int kMaxHashCount = 10;
 
-  explicit HashCuckooRepFactory(size_t write_buffer_size,
-                                size_t average_data_size,
-                                unsigned int hash_function_count)
-      : write_buffer_size_(write_buffer_size),
-        average_data_size_(average_data_size),
-        hash_function_count_(hash_function_count) {}
+	explicit HashCuckooRepFactory(size_t write_buffer_size,
+				      size_t average_data_size,
+				      unsigned int hash_function_count)
+		: write_buffer_size_(write_buffer_size),
+		  average_data_size_(average_data_size),
+		  hash_function_count_(hash_function_count)
+	{
+	}
 
-  virtual ~HashCuckooRepFactory() {}
+	virtual ~HashCuckooRepFactory()
+	{
+	}
 
-  using MemTableRepFactory::CreateMemTableRep;
-  virtual MemTableRep* CreateMemTableRep(
-      const MemTableRep::KeyComparator& compare, Allocator* allocator,
-      const SliceTransform* transform, Logger* logger) override;
+	using MemTableRepFactory::CreateMemTableRep;
+	virtual MemTableRep *
+	CreateMemTableRep(const MemTableRep::KeyComparator &compare,
+			  Allocator *allocator, const SliceTransform *transform,
+			  Logger *logger) override;
 
-  virtual const char* Name() const override { return "HashCuckooRepFactory"; }
+	virtual const char *Name() const override
+	{
+		return "HashCuckooRepFactory";
+	}
 
- private:
-  size_t write_buffer_size_;
-  size_t average_data_size_;
-  const unsigned int hash_function_count_;
+    private:
+	size_t write_buffer_size_;
+	size_t average_data_size_;
+	const unsigned int hash_function_count_;
 };
-}  // namespace rocksdb
-#endif  // ROCKSDB_LITE
+} // namespace rocksdb
+#endif // ROCKSDB_LITE

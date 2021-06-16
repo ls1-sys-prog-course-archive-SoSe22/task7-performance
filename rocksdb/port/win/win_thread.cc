@@ -17,150 +17,153 @@
 #include <system_error>
 #include <thread>
 
-namespace rocksdb {
-namespace port {
-
+namespace rocksdb
+{
+namespace port
+{
 struct WindowsThread::Data {
+	std::function<void()> func_;
+	uintptr_t handle_;
 
-  std::function<void()> func_;
-  uintptr_t             handle_;
+	Data(std::function<void()> &&func) : func_(std::move(func)), handle_(0)
+	{
+	}
 
-  Data(std::function<void()>&& func) :
-    func_(std::move(func)),
-    handle_(0) {
-  }
+	Data(const Data &) = delete;
+	Data &operator=(const Data &) = delete;
 
-  Data(const Data&) = delete;
-  Data& operator=(const Data&) = delete;
-
-  static unsigned int __stdcall ThreadProc(void* arg);
+	static unsigned int __stdcall ThreadProc(void *arg);
 };
 
+void WindowsThread::Init(std::function<void()> &&func)
+{
+	data_.reset(new Data(std::move(func)));
 
-void WindowsThread::Init(std::function<void()>&& func) {
+	data_->handle_ = _beginthreadex(NULL,
+					0, // stack size
+					&Data::ThreadProc, data_.get(),
+					0, // init flag
+					&th_id_);
 
-  data_.reset(new Data(std::move(func)));
-
-  data_->handle_ = _beginthreadex(NULL,
-    0,    // stack size
-    &Data::ThreadProc,
-    data_.get(),
-    0,   // init flag
-    &th_id_);
-
-  if (data_->handle_ == 0) {
-    throw std::system_error(std::make_error_code(
-      std::errc::resource_unavailable_try_again),
-      "Unable to create a thread");
-  }
+	if (data_->handle_ == 0) {
+		throw std::system_error(
+			std::make_error_code(
+				std::errc::resource_unavailable_try_again),
+			"Unable to create a thread");
+	}
 }
 
-WindowsThread::WindowsThread() :
-  data_(nullptr),
-  th_id_(0)
-{}
-
-
-WindowsThread::~WindowsThread() {
-  // Must be joined or detached
-  // before destruction.
-  // This is the same as std::thread
-  if (data_) {
-    if (joinable()) {
-      assert(false);
-      std::terminate();
-    }
-    data_.reset();
-  }
+WindowsThread::WindowsThread() : data_(nullptr), th_id_(0)
+{
 }
 
-WindowsThread::WindowsThread(WindowsThread&& o) noexcept :
-  WindowsThread() {
-  *this = std::move(o);
+WindowsThread::~WindowsThread()
+{
+	// Must be joined or detached
+	// before destruction.
+	// This is the same as std::thread
+	if (data_) {
+		if (joinable()) {
+			assert(false);
+			std::terminate();
+		}
+		data_.reset();
+	}
 }
 
-WindowsThread& WindowsThread::operator=(WindowsThread&& o) noexcept {
-
-  if (joinable()) {
-    assert(false);
-    std::terminate();
-  }
-
-  data_ = std::move(o.data_);
-
-  // Per spec both instances will have the same id
-  th_id_ = o.th_id_;
-
-  return *this;
+WindowsThread::WindowsThread(WindowsThread &&o) noexcept : WindowsThread()
+{
+	*this = std::move(o);
 }
 
-bool WindowsThread::joinable() const {
-  return (data_ && data_->handle_ != 0);
+WindowsThread &WindowsThread::operator=(WindowsThread &&o) noexcept
+{
+	if (joinable()) {
+		assert(false);
+		std::terminate();
+	}
+
+	data_ = std::move(o.data_);
+
+	// Per spec both instances will have the same id
+	th_id_ = o.th_id_;
+
+	return *this;
 }
 
-WindowsThread::native_handle_type WindowsThread::native_handle() const {
-  return reinterpret_cast<native_handle_type>(data_->handle_);
+bool WindowsThread::joinable() const
+{
+	return (data_ && data_->handle_ != 0);
 }
 
-unsigned WindowsThread::hardware_concurrency() {
-  return std::thread::hardware_concurrency();
+WindowsThread::native_handle_type WindowsThread::native_handle() const
+{
+	return reinterpret_cast<native_handle_type>(data_->handle_);
 }
 
-void WindowsThread::join() {
-
-  if (!joinable()) {
-    assert(false);
-    throw std::system_error(
-      std::make_error_code(std::errc::invalid_argument),
-      "Thread is no longer joinable");
-  }
-
-  if (GetThreadId(GetCurrentThread()) == th_id_) {
-    assert(false);
-    throw std::system_error(
-      std::make_error_code(std::errc::resource_deadlock_would_occur),
-      "Can not join itself");
-  }
-
-  auto ret = WaitForSingleObject(reinterpret_cast<HANDLE>(data_->handle_),
-    INFINITE);
-  if (ret != WAIT_OBJECT_0) {
-    auto lastError = GetLastError();
-    assert(false);
-    throw std::system_error(static_cast<int>(lastError),
-      std::system_category(),
-      "WaitForSingleObjectFailed");
-  }
-
-  CloseHandle(reinterpret_cast<HANDLE>(data_->handle_));
-  data_->handle_ = 0;
+unsigned WindowsThread::hardware_concurrency()
+{
+	return std::thread::hardware_concurrency();
 }
 
-bool WindowsThread::detach() {
+void WindowsThread::join()
+{
+	if (!joinable()) {
+		assert(false);
+		throw std::system_error(
+			std::make_error_code(std::errc::invalid_argument),
+			"Thread is no longer joinable");
+	}
 
-  if (!joinable()) {
-    assert(false);
-    throw std::system_error(
-      std::make_error_code(std::errc::invalid_argument),
-      "Thread is no longer available");
-  }
+	if (GetThreadId(GetCurrentThread()) == th_id_) {
+		assert(false);
+		throw std::system_error(
+			std::make_error_code(
+				std::errc::resource_deadlock_would_occur),
+			"Can not join itself");
+	}
 
-  BOOL ret = CloseHandle(reinterpret_cast<HANDLE>(data_->handle_));
-  data_->handle_ = 0;
+	auto ret = WaitForSingleObject(reinterpret_cast<HANDLE>(data_->handle_),
+				       INFINITE);
+	if (ret != WAIT_OBJECT_0) {
+		auto lastError = GetLastError();
+		assert(false);
+		throw std::system_error(static_cast<int>(lastError),
+					std::system_category(),
+					"WaitForSingleObjectFailed");
+	}
 
-  return (ret == TRUE);
+	CloseHandle(reinterpret_cast<HANDLE>(data_->handle_));
+	data_->handle_ = 0;
 }
 
-void  WindowsThread::swap(WindowsThread& o) {
-  data_.swap(o.data_);
-  std::swap(th_id_, o.th_id_);
+bool WindowsThread::detach()
+{
+	if (!joinable()) {
+		assert(false);
+		throw std::system_error(
+			std::make_error_code(std::errc::invalid_argument),
+			"Thread is no longer available");
+	}
+
+	BOOL ret = CloseHandle(reinterpret_cast<HANDLE>(data_->handle_));
+	data_->handle_ = 0;
+
+	return (ret == TRUE);
 }
 
-unsigned int __stdcall  WindowsThread::Data::ThreadProc(void* arg) {
-  auto data = reinterpret_cast<WindowsThread::Data*>(arg);
-  data->func_();
-  _endthreadex(0);
-  return 0;
+void WindowsThread::swap(WindowsThread &o)
+{
+	data_.swap(o.data_);
+	std::swap(th_id_, o.th_id_);
+}
+
+unsigned int __stdcall WindowsThread::Data::ThreadProc(void *arg)
+{
+	auto data = reinterpret_cast<WindowsThread::Data *>(arg);
+	data->func_();
+	_endthreadex(0);
+	return 0;
 }
 } // namespace port
 } // namespace rocksdb

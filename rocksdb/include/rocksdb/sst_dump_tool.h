@@ -5,13 +5,13 @@
 #ifndef ROCKSDB_LITE
 #pragma once
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class SSTDumpTool {
- public:
-  int Run(int argc, char** argv);
+    public:
+	int Run(int argc, char **argv);
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // ROCKSDB_LITE
+#endif // ROCKSDB_LITE

@@ -12,8 +12,8 @@
 #include "rocksdb/options.h"
 #include "rocksdb/table.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 struct EnvOptions;
 
 using std::unique_ptr;
@@ -125,54 +125,68 @@ class TableBuilder;
 //
 //
 class PlainTableFactory : public TableFactory {
- public:
-  ~PlainTableFactory() {}
-  // user_key_len is the length of the user key. If it is set to be
-  // kPlainTableVariableLength, then it means variable length. Otherwise, all
-  // the keys need to have the fix length of this value. bloom_bits_per_key is
-  // number of bits used for bloom filer per key. hash_table_ratio is
-  // the desired utilization of the hash table used for prefix hashing.
-  // hash_table_ratio = number of prefixes / #buckets in the hash table
-  // hash_table_ratio = 0 means skip hash table but only replying on binary
-  // search.
-  // index_sparseness determines index interval for keys
-  // inside the same prefix. It will be the maximum number of linear search
-  // required after hash and binary search.
-  // index_sparseness = 0 means index for every key.
-  // huge_page_tlb_size determines whether to allocate hash indexes from huge
-  // page TLB and the page size if allocating from there. See comments of
-  // Arena::AllocateAligned() for details.
-  explicit PlainTableFactory(
-      const PlainTableOptions& _table_options = PlainTableOptions())
-      : table_options_(_table_options) {}
+    public:
+	~PlainTableFactory()
+	{
+	}
+	// user_key_len is the length of the user key. If it is set to be
+	// kPlainTableVariableLength, then it means variable length. Otherwise, all
+	// the keys need to have the fix length of this value. bloom_bits_per_key is
+	// number of bits used for bloom filer per key. hash_table_ratio is
+	// the desired utilization of the hash table used for prefix hashing.
+	// hash_table_ratio = number of prefixes / #buckets in the hash table
+	// hash_table_ratio = 0 means skip hash table but only replying on binary
+	// search.
+	// index_sparseness determines index interval for keys
+	// inside the same prefix. It will be the maximum number of linear search
+	// required after hash and binary search.
+	// index_sparseness = 0 means index for every key.
+	// huge_page_tlb_size determines whether to allocate hash indexes from huge
+	// page TLB and the page size if allocating from there. See comments of
+	// Arena::AllocateAligned() for details.
+	explicit PlainTableFactory(
+		const PlainTableOptions &_table_options = PlainTableOptions())
+		: table_options_(_table_options)
+	{
+	}
 
-  const char* Name() const override { return "PlainTable"; }
-  Status NewTableReader(const TableReaderOptions& table_reader_options,
-                        unique_ptr<RandomAccessFileReader>&& file,
-                        uint64_t file_size, unique_ptr<TableReader>* table,
-                        bool prefetch_index_and_filter_in_cache) const override;
+	const char *Name() const override
+	{
+		return "PlainTable";
+	}
+	Status
+	NewTableReader(const TableReaderOptions &table_reader_options,
+		       unique_ptr<RandomAccessFileReader> &&file,
+		       uint64_t file_size, unique_ptr<TableReader> *table,
+		       bool prefetch_index_and_filter_in_cache) const override;
 
-  TableBuilder* NewTableBuilder(
-      const TableBuilderOptions& table_builder_options,
-      uint32_t column_family_id, WritableFileWriter* file) const override;
+	TableBuilder *
+	NewTableBuilder(const TableBuilderOptions &table_builder_options,
+			uint32_t column_family_id,
+			WritableFileWriter *file) const override;
 
-  std::string GetPrintableTableOptions() const override;
+	std::string GetPrintableTableOptions() const override;
 
-  const PlainTableOptions& table_options() const;
+	const PlainTableOptions &table_options() const;
 
-  static const char kValueTypeSeqId0 = char(0xFF);
+	static const char kValueTypeSeqId0 = char(0xFF);
 
-  // Sanitizes the specified DB Options.
-  Status SanitizeOptions(const DBOptions& db_opts,
-                         const ColumnFamilyOptions& cf_opts) const override {
-    return Status::OK();
-  }
+	// Sanitizes the specified DB Options.
+	Status
+	SanitizeOptions(const DBOptions &db_opts,
+			const ColumnFamilyOptions &cf_opts) const override
+	{
+		return Status::OK();
+	}
 
-  void* GetOptions() override { return &table_options_; }
+	void *GetOptions() override
+	{
+		return &table_options_;
+	}
 
- private:
-  PlainTableOptions table_options_;
+    private:
+	PlainTableOptions table_options_;
 };
 
-}  // namespace rocksdb
-#endif  // ROCKSDB_LITE
+} // namespace rocksdb
+#endif // ROCKSDB_LITE

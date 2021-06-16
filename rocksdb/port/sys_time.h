@@ -17,32 +17,33 @@
 
 #include <time.h>
 
-namespace rocksdb {
-
-namespace port {
-
+namespace rocksdb
+{
+namespace port
+{
 // Avoid including winsock2.h for this definition
 typedef struct timeval {
-  long tv_sec;
-  long tv_usec;
+	long tv_sec;
+	long tv_usec;
 } timeval;
 
-void gettimeofday(struct timeval* tv, struct timezone* tz);
+void gettimeofday(struct timeval *tv, struct timezone *tz);
 
-inline struct tm* localtime_r(const time_t* timep, struct tm* result) {
-  errno_t ret = localtime_s(result, timep);
-  return (ret == 0) ? result : NULL;
+inline struct tm *localtime_r(const time_t *timep, struct tm *result)
+{
+	errno_t ret = localtime_s(result, timep);
+	return (ret == 0) ? result : NULL;
 }
-}
+} // namespace port
 
-using port::timeval;
 using port::gettimeofday;
 using port::localtime_r;
-}
+using port::timeval;
+} // namespace rocksdb
 
 #else
 #include <time.h>
 #include <sys/time.h>
 #endif
 
-#endif  // STORAGE_LEVELDB_PORT_SYS_TIME_H_
+#endif // STORAGE_LEVELDB_PORT_SYS_TIME_H_

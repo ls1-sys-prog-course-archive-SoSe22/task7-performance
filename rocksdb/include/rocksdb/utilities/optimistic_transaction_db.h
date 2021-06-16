@@ -12,8 +12,8 @@
 #include "rocksdb/comparator.h"
 #include "rocksdb/db.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class Transaction;
 
 // Database with Transaction support.
@@ -22,55 +22,62 @@ class Transaction;
 
 // Options to use when starting an Optimistic Transaction
 struct OptimisticTransactionOptions {
-  // Setting set_snapshot=true is the same as calling SetSnapshot().
-  bool set_snapshot = false;
+	// Setting set_snapshot=true is the same as calling SetSnapshot().
+	bool set_snapshot = false;
 
-  // Should be set if the DB has a non-default comparator.
-  // See comment in WriteBatchWithIndex constructor.
-  const Comparator* cmp = BytewiseComparator();
+	// Should be set if the DB has a non-default comparator.
+	// See comment in WriteBatchWithIndex constructor.
+	const Comparator *cmp = BytewiseComparator();
 };
 
 class OptimisticTransactionDB {
- public:
-  // Open an OptimisticTransactionDB similar to DB::Open().
-  static Status Open(const Options& options, const std::string& dbname,
-                     OptimisticTransactionDB** dbptr);
+    public:
+	// Open an OptimisticTransactionDB similar to DB::Open().
+	static Status Open(const Options &options, const std::string &dbname,
+			   OptimisticTransactionDB **dbptr);
 
-  static Status Open(const DBOptions& db_options, const std::string& dbname,
-                     const std::vector<ColumnFamilyDescriptor>& column_families,
-                     std::vector<ColumnFamilyHandle*>* handles,
-                     OptimisticTransactionDB** dbptr);
+	static Status
+	Open(const DBOptions &db_options, const std::string &dbname,
+	     const std::vector<ColumnFamilyDescriptor> &column_families,
+	     std::vector<ColumnFamilyHandle *> *handles,
+	     OptimisticTransactionDB **dbptr);
 
-  virtual ~OptimisticTransactionDB() {}
+	virtual ~OptimisticTransactionDB()
+	{
+	}
 
-  // Starts a new Transaction.
-  //
-  // Caller is responsible for deleting the returned transaction when no
-  // longer needed.
-  //
-  // If old_txn is not null, BeginTransaction will reuse this Transaction
-  // handle instead of allocating a new one.  This is an optimization to avoid
-  // extra allocations when repeatedly creating transactions.
-  virtual Transaction* BeginTransaction(
-      const WriteOptions& write_options,
-      const OptimisticTransactionOptions& txn_options =
-          OptimisticTransactionOptions(),
-      Transaction* old_txn = nullptr) = 0;
+	// Starts a new Transaction.
+	//
+	// Caller is responsible for deleting the returned transaction when no
+	// longer needed.
+	//
+	// If old_txn is not null, BeginTransaction will reuse this Transaction
+	// handle instead of allocating a new one.  This is an optimization to avoid
+	// extra allocations when repeatedly creating transactions.
+	virtual Transaction *
+	BeginTransaction(const WriteOptions &write_options,
+			 const OptimisticTransactionOptions &txn_options =
+				 OptimisticTransactionOptions(),
+			 Transaction *old_txn = nullptr) = 0;
 
-  // Return the underlying Database that was opened
-  virtual DB* GetBaseDB() = 0;
+	// Return the underlying Database that was opened
+	virtual DB *GetBaseDB() = 0;
 
- protected:
-  // To Create an OptimisticTransactionDB, call Open()
-  explicit OptimisticTransactionDB(DB* db) {}
-  OptimisticTransactionDB() {}
+    protected:
+	// To Create an OptimisticTransactionDB, call Open()
+	explicit OptimisticTransactionDB(DB *db)
+	{
+	}
+	OptimisticTransactionDB()
+	{
+	}
 
- private:
-  // No copying allowed
-  OptimisticTransactionDB(const OptimisticTransactionDB&);
-  void operator=(const OptimisticTransactionDB&);
+    private:
+	// No copying allowed
+	OptimisticTransactionDB(const OptimisticTransactionDB &);
+	void operator=(const OptimisticTransactionDB &);
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // ROCKSDB_LITE
+#endif // ROCKSDB_LITE

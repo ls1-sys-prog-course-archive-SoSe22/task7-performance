@@ -18,8 +18,8 @@
 #include "table/block_builder.h"
 #include "table/format.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class BlockBuilder;
 class BlockHandle;
 class Env;
@@ -30,47 +30,47 @@ struct TableProperties;
 class InternalIterator;
 
 class MetaIndexBuilder {
- public:
-  MetaIndexBuilder(const MetaIndexBuilder&) = delete;
-  MetaIndexBuilder& operator=(const MetaIndexBuilder&) = delete;
+    public:
+	MetaIndexBuilder(const MetaIndexBuilder &) = delete;
+	MetaIndexBuilder &operator=(const MetaIndexBuilder &) = delete;
 
-  MetaIndexBuilder();
-  void Add(const std::string& key, const BlockHandle& handle);
+	MetaIndexBuilder();
+	void Add(const std::string &key, const BlockHandle &handle);
 
-  // Write all the added key/value pairs to the block and return the contents
-  // of the block.
-  Slice Finish();
+	// Write all the added key/value pairs to the block and return the contents
+	// of the block.
+	Slice Finish();
 
- private:
-  // store the sorted key/handle of the metablocks.
-  stl_wrappers::KVMap meta_block_handles_;
-  std::unique_ptr<BlockBuilder> meta_index_block_;
+    private:
+	// store the sorted key/handle of the metablocks.
+	stl_wrappers::KVMap meta_block_handles_;
+	std::unique_ptr<BlockBuilder> meta_index_block_;
 };
 
 class PropertyBlockBuilder {
- public:
-  PropertyBlockBuilder(const PropertyBlockBuilder&) = delete;
-  PropertyBlockBuilder& operator=(const PropertyBlockBuilder&) = delete;
+    public:
+	PropertyBlockBuilder(const PropertyBlockBuilder &) = delete;
+	PropertyBlockBuilder &operator=(const PropertyBlockBuilder &) = delete;
 
-  PropertyBlockBuilder();
+	PropertyBlockBuilder();
 
-  void AddTableProperty(const TableProperties& props);
-  void Add(const std::string& key, uint64_t value);
-  void Add(const std::string& key, const std::string& value);
-  void Add(const UserCollectedProperties& user_collected_properties);
+	void AddTableProperty(const TableProperties &props);
+	void Add(const std::string &key, uint64_t value);
+	void Add(const std::string &key, const std::string &value);
+	void Add(const UserCollectedProperties &user_collected_properties);
 
-  // Write all the added entries to the block and return the block contents
-  Slice Finish();
+	// Write all the added entries to the block and return the block contents
+	Slice Finish();
 
- private:
-  std::unique_ptr<BlockBuilder> properties_block_;
-  stl_wrappers::KVMap props_;
+    private:
+	std::unique_ptr<BlockBuilder> properties_block_;
+	stl_wrappers::KVMap props_;
 };
 
 // Were we encounter any error occurs during user-defined statistics collection,
 // we'll write the warning message to info log.
-void LogPropertiesCollectionError(
-    Logger* info_log, const std::string& method, const std::string& name);
+void LogPropertiesCollectionError(Logger *info_log, const std::string &method,
+				  const std::string &name);
 
 // Utility functions help table builder to trigger batch events for user
 // defined property collectors.
@@ -79,52 +79,52 @@ void LogPropertiesCollectionError(
 // NotifyCollectTableCollectorsOnAdd() triggers the `Add` event for all
 // property collectors.
 bool NotifyCollectTableCollectorsOnAdd(
-    const Slice& key, const Slice& value, uint64_t file_size,
-    const std::vector<std::unique_ptr<IntTblPropCollector>>& collectors,
-    Logger* info_log);
+	const Slice &key, const Slice &value, uint64_t file_size,
+	const std::vector<std::unique_ptr<IntTblPropCollector> > &collectors,
+	Logger *info_log);
 
 // NotifyCollectTableCollectorsOnAdd() triggers the `Finish` event for all
 // property collectors. The collected properties will be added to `builder`.
 bool NotifyCollectTableCollectorsOnFinish(
-    const std::vector<std::unique_ptr<IntTblPropCollector>>& collectors,
-    Logger* info_log, PropertyBlockBuilder* builder);
+	const std::vector<std::unique_ptr<IntTblPropCollector> > &collectors,
+	Logger *info_log, PropertyBlockBuilder *builder);
 
 // Read the properties from the table.
 // @returns a status to indicate if the operation succeeded. On success,
 //          *table_properties will point to a heap-allocated TableProperties
 //          object, otherwise value of `table_properties` will not be modified.
-Status ReadProperties(const Slice& handle_value, RandomAccessFileReader* file,
-                      const Footer& footer, const ImmutableCFOptions &ioptions,
-                      TableProperties** table_properties);
+Status ReadProperties(const Slice &handle_value, RandomAccessFileReader *file,
+		      const Footer &footer, const ImmutableCFOptions &ioptions,
+		      TableProperties **table_properties);
 
 // Directly read the properties from the properties block of a plain table.
 // @returns a status to indicate if the operation succeeded. On success,
 //          *table_properties will point to a heap-allocated TableProperties
 //          object, otherwise value of `table_properties` will not be modified.
-Status ReadTableProperties(RandomAccessFileReader* file, uint64_t file_size,
-                           uint64_t table_magic_number,
-                           const ImmutableCFOptions &ioptions,
-                           TableProperties** properties);
+Status ReadTableProperties(RandomAccessFileReader *file, uint64_t file_size,
+			   uint64_t table_magic_number,
+			   const ImmutableCFOptions &ioptions,
+			   TableProperties **properties);
 
 // Find the meta block from the meta index block.
-Status FindMetaBlock(InternalIterator* meta_index_iter,
-                     const std::string& meta_block_name,
-                     BlockHandle* block_handle);
+Status FindMetaBlock(InternalIterator *meta_index_iter,
+		     const std::string &meta_block_name,
+		     BlockHandle *block_handle);
 
 // Find the meta block
-Status FindMetaBlock(RandomAccessFileReader* file, uint64_t file_size,
-                     uint64_t table_magic_number,
-                     const ImmutableCFOptions &ioptions,
-                     const std::string& meta_block_name,
-                     BlockHandle* block_handle);
+Status FindMetaBlock(RandomAccessFileReader *file, uint64_t file_size,
+		     uint64_t table_magic_number,
+		     const ImmutableCFOptions &ioptions,
+		     const std::string &meta_block_name,
+		     BlockHandle *block_handle);
 
 // Read the specified meta block with name meta_block_name
 // from `file` and initialize `contents` with contents of this block.
 // Return Status::OK in case of success.
-Status ReadMetaBlock(RandomAccessFileReader* file, uint64_t file_size,
-                     uint64_t table_magic_number,
-                     const ImmutableCFOptions &ioptions,
-                     const std::string& meta_block_name,
-                     BlockContents* contents);
+Status ReadMetaBlock(RandomAccessFileReader *file, uint64_t file_size,
+		     uint64_t table_magic_number,
+		     const ImmutableCFOptions &ioptions,
+		     const std::string &meta_block_name,
+		     BlockContents *contents);
 
-}  // namespace rocksdb
+} // namespace rocksdb

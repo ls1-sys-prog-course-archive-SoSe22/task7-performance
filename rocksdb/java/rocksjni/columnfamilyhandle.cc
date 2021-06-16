@@ -18,9 +18,11 @@
  * Method:    disposeInternal
  * Signature: (J)V
  */
-void Java_org_rocksdb_ColumnFamilyHandle_disposeInternal(
-    JNIEnv* env, jobject jobj, jlong handle) {
-  auto* cfh = reinterpret_cast<rocksdb::ColumnFamilyHandle*>(handle);
-  assert(cfh != nullptr);
-  delete cfh;
+void Java_org_rocksdb_ColumnFamilyHandle_disposeInternal(JNIEnv *env,
+							 jobject jobj,
+							 jlong handle)
+{
+	auto *cfh = reinterpret_cast<rocksdb::ColumnFamilyHandle *>(handle);
+	assert(cfh != nullptr);
+	delete cfh;
 }

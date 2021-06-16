@@ -22,17 +22,20 @@
  * Method:    newSstFileWriter
  * Signature: (JJJ)J
  */
-jlong Java_org_rocksdb_SstFileWriter_newSstFileWriter__JJJ(JNIEnv *env, jclass jcls,
-                                                      jlong jenvoptions,
-                                                      jlong joptions,
-                                                      jlong jcomparator) {
-  auto *env_options =
-      reinterpret_cast<const rocksdb::EnvOptions *>(jenvoptions);
-  auto *options = reinterpret_cast<const rocksdb::Options *>(joptions);
-  auto *comparator = reinterpret_cast<const rocksdb::Comparator *>(jcomparator);
-  rocksdb::SstFileWriter *sst_file_writer =
-      new rocksdb::SstFileWriter(*env_options, *options, comparator);
-  return reinterpret_cast<jlong>(sst_file_writer);
+jlong Java_org_rocksdb_SstFileWriter_newSstFileWriter__JJJ(JNIEnv *env,
+							   jclass jcls,
+							   jlong jenvoptions,
+							   jlong joptions,
+							   jlong jcomparator)
+{
+	auto *env_options =
+		reinterpret_cast<const rocksdb::EnvOptions *>(jenvoptions);
+	auto *options = reinterpret_cast<const rocksdb::Options *>(joptions);
+	auto *comparator =
+		reinterpret_cast<const rocksdb::Comparator *>(jcomparator);
+	rocksdb::SstFileWriter *sst_file_writer =
+		new rocksdb::SstFileWriter(*env_options, *options, comparator);
+	return reinterpret_cast<jlong>(sst_file_writer);
 }
 
 /*
@@ -40,15 +43,17 @@ jlong Java_org_rocksdb_SstFileWriter_newSstFileWriter__JJJ(JNIEnv *env, jclass j
  * Method:    newSstFileWriter
  * Signature: (JJ)J
  */
-jlong Java_org_rocksdb_SstFileWriter_newSstFileWriter__JJ(JNIEnv *env, jclass jcls,
-                                                      jlong jenvoptions,
-                                                      jlong joptions) {
-  auto *env_options =
-      reinterpret_cast<const rocksdb::EnvOptions *>(jenvoptions);
-  auto *options = reinterpret_cast<const rocksdb::Options *>(joptions);
-  rocksdb::SstFileWriter *sst_file_writer =
-      new rocksdb::SstFileWriter(*env_options, *options);
-  return reinterpret_cast<jlong>(sst_file_writer);
+jlong Java_org_rocksdb_SstFileWriter_newSstFileWriter__JJ(JNIEnv *env,
+							  jclass jcls,
+							  jlong jenvoptions,
+							  jlong joptions)
+{
+	auto *env_options =
+		reinterpret_cast<const rocksdb::EnvOptions *>(jenvoptions);
+	auto *options = reinterpret_cast<const rocksdb::Options *>(joptions);
+	rocksdb::SstFileWriter *sst_file_writer =
+		new rocksdb::SstFileWriter(*env_options, *options);
+	return reinterpret_cast<jlong>(sst_file_writer);
 }
 
 /*
@@ -57,19 +62,21 @@ jlong Java_org_rocksdb_SstFileWriter_newSstFileWriter__JJ(JNIEnv *env, jclass jc
  * Signature: (JLjava/lang/String;)V
  */
 void Java_org_rocksdb_SstFileWriter_open(JNIEnv *env, jobject jobj,
-                                         jlong jhandle, jstring jfile_path) {
-  const char *file_path = env->GetStringUTFChars(jfile_path, nullptr);
-  if(file_path == nullptr) {
-    // exception thrown: OutOfMemoryError
-    return;
-  }
-  rocksdb::Status s =
-      reinterpret_cast<rocksdb::SstFileWriter *>(jhandle)->Open(file_path);
-  env->ReleaseStringUTFChars(jfile_path, file_path);
+					 jlong jhandle, jstring jfile_path)
+{
+	const char *file_path = env->GetStringUTFChars(jfile_path, nullptr);
+	if (file_path == nullptr) {
+		// exception thrown: OutOfMemoryError
+		return;
+	}
+	rocksdb::Status s =
+		reinterpret_cast<rocksdb::SstFileWriter *>(jhandle)->Open(
+			file_path);
+	env->ReleaseStringUTFChars(jfile_path, file_path);
 
-  if (!s.ok()) {
-    rocksdb::RocksDBExceptionJni::ThrowNew(env, s);
-  }
+	if (!s.ok()) {
+		rocksdb::RocksDBExceptionJni::ThrowNew(env, s);
+	}
 }
 
 /*
@@ -78,16 +85,17 @@ void Java_org_rocksdb_SstFileWriter_open(JNIEnv *env, jobject jobj,
  * Signature: (JJJ)V
  */
 void Java_org_rocksdb_SstFileWriter_put(JNIEnv *env, jobject jobj,
-                                        jlong jhandle, jlong jkey_handle,
-                                        jlong jvalue_handle) {
-  auto *key_slice = reinterpret_cast<rocksdb::Slice *>(jkey_handle);
-  auto *value_slice = reinterpret_cast<rocksdb::Slice *>(jvalue_handle);
-  rocksdb::Status s =
-    reinterpret_cast<rocksdb::SstFileWriter *>(jhandle)->Put(*key_slice,
-                                                             *value_slice);
-  if (!s.ok()) {
-    rocksdb::RocksDBExceptionJni::ThrowNew(env, s);
-  }
+					jlong jhandle, jlong jkey_handle,
+					jlong jvalue_handle)
+{
+	auto *key_slice = reinterpret_cast<rocksdb::Slice *>(jkey_handle);
+	auto *value_slice = reinterpret_cast<rocksdb::Slice *>(jvalue_handle);
+	rocksdb::Status s =
+		reinterpret_cast<rocksdb::SstFileWriter *>(jhandle)->Put(
+			*key_slice, *value_slice);
+	if (!s.ok()) {
+		rocksdb::RocksDBExceptionJni::ThrowNew(env, s);
+	}
 }
 
 /*
@@ -96,16 +104,17 @@ void Java_org_rocksdb_SstFileWriter_put(JNIEnv *env, jobject jobj,
  * Signature: (JJJ)V
  */
 void Java_org_rocksdb_SstFileWriter_merge(JNIEnv *env, jobject jobj,
-                                          jlong jhandle, jlong jkey_handle,
-                                          jlong jvalue_handle) {
-  auto *key_slice = reinterpret_cast<rocksdb::Slice *>(jkey_handle);
-  auto *value_slice = reinterpret_cast<rocksdb::Slice *>(jvalue_handle);
-  rocksdb::Status s =
-    reinterpret_cast<rocksdb::SstFileWriter *>(jhandle)->Merge(*key_slice,
-                                                               *value_slice);
-  if (!s.ok()) {
-    rocksdb::RocksDBExceptionJni::ThrowNew(env, s);
-  }
+					  jlong jhandle, jlong jkey_handle,
+					  jlong jvalue_handle)
+{
+	auto *key_slice = reinterpret_cast<rocksdb::Slice *>(jkey_handle);
+	auto *value_slice = reinterpret_cast<rocksdb::Slice *>(jvalue_handle);
+	rocksdb::Status s =
+		reinterpret_cast<rocksdb::SstFileWriter *>(jhandle)->Merge(
+			*key_slice, *value_slice);
+	if (!s.ok()) {
+		rocksdb::RocksDBExceptionJni::ThrowNew(env, s);
+	}
 }
 
 /*
@@ -114,13 +123,15 @@ void Java_org_rocksdb_SstFileWriter_merge(JNIEnv *env, jobject jobj,
  * Signature: (JJJ)V
  */
 void Java_org_rocksdb_SstFileWriter_delete(JNIEnv *env, jobject jobj,
-                                           jlong jhandle, jlong jkey_handle) {
-  auto *key_slice = reinterpret_cast<rocksdb::Slice *>(jkey_handle);
-  rocksdb::Status s =
-    reinterpret_cast<rocksdb::SstFileWriter *>(jhandle)->Delete(*key_slice);
-  if (!s.ok()) {
-    rocksdb::RocksDBExceptionJni::ThrowNew(env, s);
-  }
+					   jlong jhandle, jlong jkey_handle)
+{
+	auto *key_slice = reinterpret_cast<rocksdb::Slice *>(jkey_handle);
+	rocksdb::Status s =
+		reinterpret_cast<rocksdb::SstFileWriter *>(jhandle)->Delete(
+			*key_slice);
+	if (!s.ok()) {
+		rocksdb::RocksDBExceptionJni::ThrowNew(env, s);
+	}
 }
 
 /*
@@ -129,12 +140,13 @@ void Java_org_rocksdb_SstFileWriter_delete(JNIEnv *env, jobject jobj,
  * Signature: (J)V
  */
 void Java_org_rocksdb_SstFileWriter_finish(JNIEnv *env, jobject jobj,
-                                           jlong jhandle) {
-  rocksdb::Status s =
-      reinterpret_cast<rocksdb::SstFileWriter *>(jhandle)->Finish();
-  if (!s.ok()) {
-    rocksdb::RocksDBExceptionJni::ThrowNew(env, s);
-  }
+					   jlong jhandle)
+{
+	rocksdb::Status s =
+		reinterpret_cast<rocksdb::SstFileWriter *>(jhandle)->Finish();
+	if (!s.ok()) {
+		rocksdb::RocksDBExceptionJni::ThrowNew(env, s);
+	}
 }
 
 /*
@@ -143,6 +155,7 @@ void Java_org_rocksdb_SstFileWriter_finish(JNIEnv *env, jobject jobj,
  * Signature: (J)V
  */
 void Java_org_rocksdb_SstFileWriter_disposeInternal(JNIEnv *env, jobject jobj,
-                                                    jlong jhandle) {
-  delete reinterpret_cast<rocksdb::SstFileWriter *>(jhandle);
+						    jlong jhandle)
+{
+	delete reinterpret_cast<rocksdb::SstFileWriter *>(jhandle);
 }

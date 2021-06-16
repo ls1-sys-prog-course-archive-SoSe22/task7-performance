@@ -17,31 +17,32 @@
 #include <sys/types.h>
 #elif defined(OS_WIN)
 
-namespace rocksdb {
-namespace port {
-
+namespace rocksdb
+{
+namespace port
+{
 struct dirent {
-  char d_name[_MAX_PATH]; /* filename */
+	char d_name[_MAX_PATH]; /* filename */
 };
 
 struct DIR;
 
-DIR* opendir(const char* name);
+DIR *opendir(const char *name);
 
-dirent* readdir(DIR* dirp);
+dirent *readdir(DIR *dirp);
 
-int closedir(DIR* dirp);
+int closedir(DIR *dirp);
 
-}  // namespace port
+} // namespace port
 
-using port::dirent;
+using port::closedir;
 using port::DIR;
+using port::dirent;
 using port::opendir;
 using port::readdir;
-using port::closedir;
 
-}  // namespace rocksdb
+} // namespace rocksdb
 
-#endif  // OS_WIN
+#endif // OS_WIN
 
-#endif  // STORAGE_LEVELDB_PORT_DIRENT_H_
+#endif // STORAGE_LEVELDB_PORT_DIRENT_H_

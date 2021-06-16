@@ -17,8 +17,8 @@
 #include "util/hash.h"
 #include "table/filter_block.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class FilterPolicy;
 class FilterBitsBuilder;
 class FilterBitsReader;
@@ -34,84 +34,96 @@ class FilterBitsReader;
 // num_probes: how many hash functions are used in bloom filter
 //
 class FullFilterBlockBuilder : public FilterBlockBuilder {
- public:
-  explicit FullFilterBlockBuilder(const SliceTransform* prefix_extractor,
-                                  bool whole_key_filtering,
-                                  FilterBitsBuilder* filter_bits_builder);
-  // bits_builder is created in filter_policy, it should be passed in here
-  // directly. and be deleted here
-  ~FullFilterBlockBuilder() {}
+    public:
+	explicit FullFilterBlockBuilder(const SliceTransform *prefix_extractor,
+					bool whole_key_filtering,
+					FilterBitsBuilder *filter_bits_builder);
+	// bits_builder is created in filter_policy, it should be passed in here
+	// directly. and be deleted here
+	~FullFilterBlockBuilder()
+	{
+	}
 
-  virtual bool IsBlockBased() override { return false; }
-  virtual void StartBlock(uint64_t block_offset) override {}
-  virtual void Add(const Slice& key) override;
-  virtual Slice Finish(const BlockHandle& tmp, Status* status) override;
-  using FilterBlockBuilder::Finish;
+	virtual bool IsBlockBased() override
+	{
+		return false;
+	}
+	virtual void StartBlock(uint64_t block_offset) override
+	{
+	}
+	virtual void Add(const Slice &key) override;
+	virtual Slice Finish(const BlockHandle &tmp, Status *status) override;
+	using FilterBlockBuilder::Finish;
 
- protected:
-  virtual void AddKey(const Slice& key);
-  std::unique_ptr<FilterBitsBuilder> filter_bits_builder_;
+    protected:
+	virtual void AddKey(const Slice &key);
+	std::unique_ptr<FilterBitsBuilder> filter_bits_builder_;
 
- private:
-  // important: all of these might point to invalid addresses
-  // at the time of destruction of this filter block. destructor
-  // should NOT dereference them.
-  const SliceTransform* prefix_extractor_;
-  bool whole_key_filtering_;
+    private:
+	// important: all of these might point to invalid addresses
+	// at the time of destruction of this filter block. destructor
+	// should NOT dereference them.
+	const SliceTransform *prefix_extractor_;
+	bool whole_key_filtering_;
 
-  uint32_t num_added_;
-  std::unique_ptr<const char[]> filter_data_;
+	uint32_t num_added_;
+	std::unique_ptr<const char[]> filter_data_;
 
-  void AddPrefix(const Slice& key);
+	void AddPrefix(const Slice &key);
 
-  // No copying allowed
-  FullFilterBlockBuilder(const FullFilterBlockBuilder&);
-  void operator=(const FullFilterBlockBuilder&);
+	// No copying allowed
+	FullFilterBlockBuilder(const FullFilterBlockBuilder &);
+	void operator=(const FullFilterBlockBuilder &);
 };
 
 // A FilterBlockReader is used to parse filter from SST table.
 // KeyMayMatch and PrefixMayMatch would trigger filter checking
 class FullFilterBlockReader : public FilterBlockReader {
- public:
-  // REQUIRES: "contents" and filter_bits_reader must stay live
-  // while *this is live.
-  explicit FullFilterBlockReader(const SliceTransform* prefix_extractor,
-                                 bool whole_key_filtering,
-                                 const Slice& contents,
-                                 FilterBitsReader* filter_bits_reader,
-                                 Statistics* statistics);
-  explicit FullFilterBlockReader(const SliceTransform* prefix_extractor,
-                                 bool whole_key_filtering,
-                                 BlockContents&& contents,
-                                 FilterBitsReader* filter_bits_reader,
-                                 Statistics* statistics);
+    public:
+	// REQUIRES: "contents" and filter_bits_reader must stay live
+	// while *this is live.
+	explicit FullFilterBlockReader(const SliceTransform *prefix_extractor,
+				       bool whole_key_filtering,
+				       const Slice &contents,
+				       FilterBitsReader *filter_bits_reader,
+				       Statistics *statistics);
+	explicit FullFilterBlockReader(const SliceTransform *prefix_extractor,
+				       bool whole_key_filtering,
+				       BlockContents &&contents,
+				       FilterBitsReader *filter_bits_reader,
+				       Statistics *statistics);
 
-  // bits_reader is created in filter_policy, it should be passed in here
-  // directly. and be deleted here
-  ~FullFilterBlockReader() {}
+	// bits_reader is created in filter_policy, it should be passed in here
+	// directly. and be deleted here
+	~FullFilterBlockReader()
+	{
+	}
 
-  virtual bool IsBlockBased() override { return false; }
-  virtual bool KeyMayMatch(
-      const Slice& key, uint64_t block_offset = kNotValid,
-      const bool no_io = false,
-      const Slice* const const_ikey_ptr = nullptr) override;
-  virtual bool PrefixMayMatch(
-      const Slice& prefix, uint64_t block_offset = kNotValid,
-      const bool no_io = false,
-      const Slice* const const_ikey_ptr = nullptr) override;
-  virtual size_t ApproximateMemoryUsage() const override;
+	virtual bool IsBlockBased() override
+	{
+		return false;
+	}
+	virtual bool
+	KeyMayMatch(const Slice &key, uint64_t block_offset = kNotValid,
+		    const bool no_io = false,
+		    const Slice *const const_ikey_ptr = nullptr) override;
+	virtual bool
+	PrefixMayMatch(const Slice &prefix, uint64_t block_offset = kNotValid,
+		       const bool no_io = false,
+		       const Slice *const const_ikey_ptr = nullptr) override;
+	virtual size_t ApproximateMemoryUsage() const override;
 
- private:
-  const SliceTransform* prefix_extractor_;
-  Slice contents_;
-  std::unique_ptr<FilterBitsReader> filter_bits_reader_;
-  BlockContents block_contents_;
-  std::unique_ptr<const char[]> filter_data_;
+    private:
+	const SliceTransform *prefix_extractor_;
+	Slice contents_;
+	std::unique_ptr<FilterBitsReader> filter_bits_reader_;
+	BlockContents block_contents_;
+	std::unique_ptr<const char[]> filter_data_;
 
-  // No copying allowed
-  FullFilterBlockReader(const FullFilterBlockReader&);
-  bool MayMatch(const Slice& entry);
-  void operator=(const FullFilterBlockReader&);
+	// No copying allowed
+	FullFilterBlockReader(const FullFilterBlockReader &);
+	bool MayMatch(const Slice &entry);
+	void operator=(const FullFilterBlockReader &);
 };
 
-}  // namespace rocksdb
+} // namespace rocksdb

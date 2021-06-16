@@ -10,8 +10,8 @@
 #pragma once
 #include "rocksdb/env.h"
 
-namespace rocksdb {
-
+namespace rocksdb
+{
 class TableCache;
 class VersionStorageInfo;
 class VersionEdit;
@@ -22,23 +22,25 @@ class InternalStats;
 // of edits to a particular state without creating intermediate
 // Versions that contain full copies of the intermediate state.
 class VersionBuilder {
- public:
-  VersionBuilder(const EnvOptions& env_options, TableCache* table_cache,
-                 VersionStorageInfo* base_vstorage, Logger* info_log = nullptr);
-  ~VersionBuilder();
-  void CheckConsistency(VersionStorageInfo* vstorage);
-  void CheckConsistencyForDeletes(VersionEdit* edit, uint64_t number,
-                                  int level);
-  void Apply(VersionEdit* edit);
-  void SaveTo(VersionStorageInfo* vstorage);
-  void LoadTableHandlers(InternalStats* internal_stats, int max_threads,
-                         bool prefetch_index_and_filter_in_cache);
-  void MaybeAddFile(VersionStorageInfo* vstorage, int level, FileMetaData* f);
+    public:
+	VersionBuilder(const EnvOptions &env_options, TableCache *table_cache,
+		       VersionStorageInfo *base_vstorage,
+		       Logger *info_log = nullptr);
+	~VersionBuilder();
+	void CheckConsistency(VersionStorageInfo *vstorage);
+	void CheckConsistencyForDeletes(VersionEdit *edit, uint64_t number,
+					int level);
+	void Apply(VersionEdit *edit);
+	void SaveTo(VersionStorageInfo *vstorage);
+	void LoadTableHandlers(InternalStats *internal_stats, int max_threads,
+			       bool prefetch_index_and_filter_in_cache);
+	void MaybeAddFile(VersionStorageInfo *vstorage, int level,
+			  FileMetaData *f);
 
- private:
-  class Rep;
-  Rep* rep_;
+    private:
+	class Rep;
+	Rep *rep_;
 };
 
-extern bool NewestFirstBySeqNo(FileMetaData* a, FileMetaData* b);
-}  // namespace rocksdb
+extern bool NewestFirstBySeqNo(FileMetaData *a, FileMetaData *b);
+} // namespace rocksdb

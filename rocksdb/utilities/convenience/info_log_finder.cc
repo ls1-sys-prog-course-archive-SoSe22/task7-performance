@@ -11,38 +11,40 @@
 #include "rocksdb/env.h"
 #include "util/filename.h"
 
-namespace rocksdb {
+namespace rocksdb
+{
+Status GetInfoLogList(DB *db, std::vector<std::string> *info_log_list)
+{
+	uint64_t number = 0;
+	FileType type;
+	std::string path;
 
-Status GetInfoLogList(DB* db, std::vector<std::string>* info_log_list) {
-  uint64_t number = 0;
-  FileType type;
-  std::string path;
+	if (!db) {
+		return Status::InvalidArgument("DB pointer is not valid");
+	}
 
-  if (!db) {
-    return Status::InvalidArgument("DB pointer is not valid");
-  }
+	const Options &options = db->GetOptions();
+	if (!options.db_log_dir.empty()) {
+		path = options.db_log_dir;
+	} else {
+		path = db->GetName();
+	}
+	InfoLogPrefix info_log_prefix(!options.db_log_dir.empty(),
+				      db->GetName());
+	auto *env = options.env;
+	std::vector<std::string> file_names;
+	Status s = env->GetChildren(path, &file_names);
 
-  const Options& options = db->GetOptions();
-  if (!options.db_log_dir.empty()) {
-    path = options.db_log_dir;
-  } else {
-    path = db->GetName();
-  }
-  InfoLogPrefix info_log_prefix(!options.db_log_dir.empty(), db->GetName());
-  auto* env = options.env;
-  std::vector<std::string> file_names;
-  Status s = env->GetChildren(path, &file_names);
+	if (!s.ok()) {
+		return s;
+	}
 
-  if (!s.ok()) {
-    return s;
-  }
-
-  for (auto f : file_names) {
-    if (ParseFileName(f, &number, info_log_prefix.prefix, &type) &&
-        (type == kInfoLogFile)) {
-      info_log_list->push_back(f);
-    }
-  }
-  return Status::OK();
+	for (auto f : file_names) {
+		if (ParseFileName(f, &number, info_log_prefix.prefix, &type) &&
+		    (type == kInfoLogFile)) {
+			info_log_list->push_back(f);
+		}
+	}
+	return Status::OK();
 }
-}  // namespace rocksdb
+} // namespace rocksdb
