@@ -64,5 +64,16 @@ MANIFEST
 .dmypy.json
 dmypy.json
 
-tests/cache-*
-tests/optimized-run
+# Binaries
+libmatrix.so
+libmandelbrot.so
+
+tests/matrix_driver
+tests/matrix_driver_output
+
+tests/mandelbrot_driver
+tests/mandelbrot_driver_output
+
+# Commit optimized binaries
+!tests/libmatrix_optimized.so
+!tests/libmandelbrot_optimized.so
