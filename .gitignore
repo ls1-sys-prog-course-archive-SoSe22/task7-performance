@@ -74,6 +74,10 @@ tests/matrix_driver_output
 tests/mandelbrot_driver
 tests/mandelbrot_driver_output
 
+# Do not commit optimized code
+tests/matrix_optimized.cpp
+tests/mandelbrot_optimized.cpp
+
 # Commit optimized binaries
 !tests/libmatrix_optimized.so
 !tests/libmandelbrot_optimized.so
