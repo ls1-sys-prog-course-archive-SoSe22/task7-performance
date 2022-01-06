@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 
-from testsupport import subtest, test_root, run, ensure_library, warn, info
+from testsupport import (
+    subtest,
+    test_root,
+    run,
+    ensure_library,
+    warn,
+    info,
+    project_root,
+)
 import tempfile
 import sys
 
@@ -14,7 +22,7 @@ def main() -> None:
             run(["make", "-C", str(test_root()), "mandelbrot_driver"])
 
         if not mandelbrot_driver_output.exists():
-            libmandelbrot_dir = str(ensure_library("libmandelbrot.so").parent)
+            libmandelbrot_dir = str(project_root())
             libmandelbrot_optimized_dir = str(test_root())
             library_path = ":".join([libmandelbrot_dir, libmandelbrot_optimized_dir])
             extra_env = {"LD_LIBRARY_PATH": library_path}

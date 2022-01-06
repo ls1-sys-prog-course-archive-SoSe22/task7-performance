@@ -6,7 +6,7 @@ Your task is to get as close as possible to our optimized code that we've commit
 
 ## Deliveries
 
-Deliver `libmatrix.so` and `libmandelbrot.so` exporting the symbols from `matrix.h` and `mandelbrot.h`.
+Deliver `libmatrix.so` and `libmandelbrot.so` in the project root directory exporting the symbols from `matrix.h` and `mandelbrot.h`.
 
 ## Notes
 

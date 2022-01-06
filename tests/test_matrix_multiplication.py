@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 
-from testsupport import subtest, test_root, run, ensure_library, warn, info
+from testsupport import (
+    subtest,
+    test_root,
+    run,
+    ensure_library,
+    warn,
+    info,
+    project_root,
+)
 import tempfile
 import sys
+
 
 def main() -> None:
     with subtest("Testing matrix multiplication performance"):
@@ -13,7 +22,7 @@ def main() -> None:
             run(["make", "-C", str(test_root()), "matrix_driver"])
 
         if not matrix_driver_output.exists():
-            libmatrix_dir = str(ensure_library("libmatrix.so").parent)
+            libmatrix_dir = str(project_root())
             libmatrix_optimized_dir = str(test_root())
             library_path = ":".join([libmatrix_dir, libmatrix_optimized_dir])
             extra_env = {"LD_LIBRARY_PATH": library_path}
@@ -23,13 +32,15 @@ def main() -> None:
 
         with open(str(matrix_driver_output), mode="r") as stdin:
             lines = stdin.read().splitlines()
-            
+
         times = [float(x) for x in lines]
         optimized_time = times[0]
         solution_time = times[1]
         fraction = optimized_time / solution_time
 
-        info(f"Optimized: {optimized_time}, Solution: {solution_time}, Fraction: {fraction}")
+        info(
+            f"Optimized: {optimized_time}, Solution: {solution_time}, Fraction: {fraction}"
+        )
 
         needed_fraction = float(sys.argv[1])
         if fraction < needed_fraction:
