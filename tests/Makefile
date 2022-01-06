@@ -1,45 +1,31 @@
-# Set you prefererred CFLAGS/compiler compiler here.
-# Our github runner provides gcc-10 by default.
+CXX ?= g++
+CXXFLAGS ?= -O3 -std=c++17 -Wall -g
+LDFLAGS ?= -lpthread
 
-.PHONY: check
+.PHONY: all check
 
-all: | build/Makefile
-	$(MAKE) compile
+all: matrix_driver mandelbrot_driver
 
+optimized: libmatrix_optimized.so libmandelbrot_optimized.so
 
-compile:
-	$(MAKE) -C build db_bench
+libmandelbrot_optimized.so: mandelbrot_optimized.cpp
+	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^ $(LDFLAGS)
 
+libmatrix_optimized.so: matrix_optimized.cpp
+	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^ $(LDFLAGS)
 
-build/Makefile: | build
-	cd build \
-	&& cmake ../rocksdb/ -DFAIL_ON_WARNINGS=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLS1_QUIET=1
+matrix_driver: matrix_driver.cpp
+	$(CXX) $(CXXFLAGS) -I.. -o $@ $< -L. -lmatrix_optimized -L.. -lmatrix  $(LDFLAGS)
 
-
-build:
-	mkdir -p $@
-
-
-optimized_run: | build/Makefile
-	$(MAKE) -C build db_bench
-	touch $@
-
+mandelbrot_driver: mandelbrot_driver.cpp
+	$(CXX) $(CXXFLAGS) -I.. -o $@ $< -L. -lmandelbrot_optimized -L.. -lmandelbrot  $(LDFLAGS) 
 
 clean:
-	-rm -rf build
-	-rm cache-optimized
+	rm -f matrix_driver matrix_driver_output
+	rm -f mandelbrot_driver mandelbrot_driver_output
 
-
-cache-optimized: optimized_run
-	./build/db_bench -flagfile config --num=50000 --threads=16 | tee cache-optimized
-
-
-cache-run: cache-optimized
-	$(MAKE) -C .. compile
-	../build/db_bench -flagfile config --num=50000 --threads=16 | tee cache-run
-
-
-check: cache-run cache-optimized
-	-python3 test.py check 0
-	-rm cache-run
-
+check: all	
+	rm -f matrix_driver_output
+	python3 ./test_matrix_multiplication.py 0.00
+	rm -f mandelbrot_driver_output
+	python3 ./test_mandelbrot.py 0.00

@@ -1,43 +1,24 @@
-# Set you prefererred CFLAGS/compiler compiler here.
-# Our github runner provides gcc-10 by default.
+CC ?= cc
+CFLAGS ?= -g -Wall -O2
+CXX ?= c++
+CXXFLAGS ?= -O3 -std=c++17 -Wall -g
+CARGO ?= cargo
+RUSTFLAGS ?= -g
+LDFLAGS = -lpthread
 
-.PHONY: all compile check
+.PHONY: all clean
 
-NUM?=50000
-#THREADS?=$(shell ./cpu.sh | grep "logical" | awk '{print $$NF}')
-THREADS?=16
-
-# this target should build all executables for all tests
-all: | build/Makefile
-	$(MAKE) compile
-
-
-compile:
-	$(MAKE) -C build db_bench
-
-
-build/Makefile: | build
-	cd build \
-	&& cmake ../rocksdb/ -DFAIL_ON_WARNINGS=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLS1_QUIET=1
-
-
-build:
-	mkdir -p $@
-
-
-run_small: NUM=10000
-run_small: run
-
-run_large: NUM=500000
-run_large: run
-
-run: all
-	./build/db_bench -flagfile tests/config --num=$(NUM) --threads=$(THREADS)
-
+all: libmatrix.so libmandelbrot.so
 
 clean:
-	-rm -rf build
+	-rm -f libmatrix.so libmandelbrot.so
 
+libmatrix.so: matrix.cpp
+	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^ $(LDFLAGS)
 
+libmandelbrot.so: mandelbrot.cpp
+	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^ $(LDFLAGS)
+
+# Usually there is no need to modify this
 check: all
 	$(MAKE) -C tests check
