@@ -11,7 +11,7 @@ LDFLAGS = -lpthread
 all: libmatrix.so libmandelbrot.so
 
 clean:
-	-rm -f libmatrix.so libmandelbrot.so
+	rm -f libmatrix.so libmandelbrot.so
 
 # libmatrix.so: matrix.cpp
 # 	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^ $(LDFLAGS)
