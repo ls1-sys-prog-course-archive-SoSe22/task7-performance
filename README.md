@@ -1,63 +1,26 @@
 # Performance
 
-This weeks exercise requires you to optimize [RocksDB](https://rocksdb.org/). RocksDB is a high-performance persistent LSM-based key value store ([pdf](https://www.cs.umb.edu/~poneil/lsmtree.pdf)). We introduced changes changes to make the performance of rocksdb worse in throughput and latency.
+This weeks exercise requires you to optimize matrix multiplication as well as mandelbrot set calculation. You're expected to make the code in `matrix.cpp` and `mandelbrot.cpp` as fast as possible. 
 
-Your task is to get as close to unmodified RocksDB performance as possible with the rocksdb version in the directory `rocksdb`, by finding the changes and fixing them.
+Your task is to get as close as possible to our optimized code that we've committed as binaries (or even surpass it!).
 
 ## Deliveries
 
-The execution of the benchmark `db_bench` has to be correct and as fast as possible.
+Deliver `libmatrix.so` and `libmandelbrot.so` exporting the symbols from `matrix.h` and `mandelbrot.h`.
 
+## Notes
 
-## General Information
+- If you want to multi-thread your code, use **a maximum of 4 (four)** threads. You can expect all inputs to your code to be a multiple of 4.
+- We know that there are faster algorithms for matrix multiplication such as [Strassen Algorithm](https://en.wikipedia.org/wiki/Strassen_algorithm). We **do not** want you to implement that. We want you to **optimize the naive version** given in `matrix.cpp`. The same goes for mandelbrot if you find a faster algorithm.
+- For mandelbrot, you're required to use the parameters given in `tests/mandelbrot_params.h`. Do not change them.
+- Regarding Rust, use the instrinsics from [core::arch::x86_64](https://doc.rust-lang.org/core/arch/x86_64/index.html) and **not** [std::simd](https://doc.rust-lang.org/nightly/std/simd/index.html).
+- We will test your code on the self-hosted runners.
+  - You might want to change `runs-on: ubuntu-latest` to `runs-on: self-hosted` in `classroom.yml` to be sure that your benchmarks run on the self-hosted runners (or check manually).
 
-1. For building run 
-   ```console
-   $ make all
-   # or for faster build time
-   $ make all -j$(./cpu.sh | grep "logical" | awk '{print $NF}')
-   ```
-2. For running db_bench run:
-   ```console
-   $ make run
-   ```
-3. For running the tests run:
-   ```console
-   $ make check
-   ```
-4. Except the tests all other configuration take a `NUM` and `THREADS` parameter to configure the tests to your system e.g.:
-   ```console
-   $ make run NUM=10000 THREADS=4
-   ```
-   However, the final test will use `NUM=50000` and `THREADS=16`
-   
- ## Requirements
- 1. tee
- 2. python3
- 3. gcc
- 4. cmake
- 5. gflags
-   
- ## Tips
- You are encouraged to use [perf](http://www.brendangregg.com/perf.html) and [flamegraph](http://www.brendangregg.com/flamegraphs.html) to profile the application and identify the parts of the code that might slowdown performance. You can either adopt the `Makefile` or copy the run command from the `Makefile` to run `db_bench` with perf.
- Perf and flamegraphs also support different modes, some of them might be useful.
- 
- The changes we introduced should be obvious, even if you do not know C++. Thus no major changes to the source code should be required.
- 
- ## References
- [RocksDB](https://rocksdb.org/)  
- [LSM Datastructure](https://www.cs.umb.edu/~poneil/lsmtree.pdf)  
- [Perf](http://www.brendangregg.com/perf.html)  
- [Flamegraph](http://www.brendangregg.com/flamegraphs.html)  
- [Intel VTunes](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/vtune-profiler.html#gs.3hg9lw)  
- [AMD μProf](https://developer.amd.com/amd-uprof/)  
- [Gperftools](https://gperftools.github.io/gperftools/)  
- [heaptrack](https://github.com/KDE/heaptrack)  
- [Valgrind](https://valgrind.org/)  
- [Google Orbit](https://github.com/google/orbit)  
- [GNU gprof](https://sourceware.org/binutils/docs/gprof/)  
- [Google Benchmark](https://github.com/google/benchmark)  
- [QuickBench](https://quick-bench.com/)  
- [CMake](https://cmake.org/)  
- [CppRefence](https://en.cppreference.com/w/)  
- [C++ Core Guidlines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)  
+## References
+
+- [Matrix multiplication](https://en.wikipedia.org/wiki/Matrix_multiplication)
+- [Mandelbrot Set](https://en.wikipedia.org/wiki/Mandelbrot_set)
+- [Intel Intrinsics Guide](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html)
+- [Rust Intrinsics](https://doc.rust-lang.org/core/arch/x86_64/index.html)
+
