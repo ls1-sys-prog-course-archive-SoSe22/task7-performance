@@ -10,7 +10,7 @@ Deliver `libmatrix.so` and `libmandelbrot.so` exporting the symbols from `matrix
 
 ## Notes
 
-- If you want to multi-thread your code, use **a maximum of 4 (four)** threads. You can expect all inputs to your code to be a multiple of 4.
+- If you want to multi-thread your code, use **a maximum of 4 (four)** threads. You can expect all inputs of your code to be a multiple of 4 in size.
 - We know that there are faster algorithms for matrix multiplication such as [Strassen Algorithm](https://en.wikipedia.org/wiki/Strassen_algorithm). We **do not** want you to implement that. We want you to **optimize the naive version** given in `matrix.cpp`. The same goes for mandelbrot if you find a faster algorithm.
 - For mandelbrot, you're required to use the parameters given in `tests/mandelbrot_params.h`. Do not change them.
 - Regarding Rust, use the instrinsics from [core::arch::x86_64](https://doc.rust-lang.org/core/arch/x86_64/index.html) and **not** [std::simd](https://doc.rust-lang.org/nightly/std/simd/index.html).
