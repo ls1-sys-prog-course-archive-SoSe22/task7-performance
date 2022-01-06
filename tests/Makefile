@@ -9,10 +9,10 @@ all: matrix_driver mandelbrot_driver
 optimized: libmatrix_optimized.so libmandelbrot_optimized.so
 
 libmandelbrot_optimized.so: mandelbrot_optimized.cpp
-	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -shared -fPIC -s -o $@ $^ $(LDFLAGS)
 
 libmatrix_optimized.so: matrix_optimized.cpp
-	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -shared -fPIC -s -o $@ $^ $(LDFLAGS)
 
 matrix_driver: matrix_driver.cpp
 	$(CXX) $(CXXFLAGS) -I.. -o $@ $< -L. -lmatrix_optimized -L.. -lmatrix  $(LDFLAGS)
