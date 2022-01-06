@@ -43,6 +43,14 @@ void naive_mandelbrot(int width, int height, int* plot) {
     }
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void mandelbrot(int width, int height, int* plot) {
     naive_mandelbrot(width, height, plot);
 }
+
+#ifdef __cplusplus
+}
+#endif
