@@ -1,8 +1,14 @@
-# Performance
+# Task 7 - Performance
 
-This weeks exercise requires you to optimize matrix multiplication as well as mandelbrot set calculation. You're expected to make the code in `matrix.cpp` and `mandelbrot.cpp` as fast as possible. 
+This weeks exercise requires you to optimize matrix multiplication as well as mandelbrot set calculation. You're provided with implementations in `matrix.cpp` and `mandelbrot.cpp`. 
 
-Your task is to get as close as possible to our optimized code that we've committed as binaries (or even surpass it!).
+## Task 7.1 - Matrix
+
+Optimize the code in `matrix.cpp` in terms of performance. Your task is to get as close as possible to our optimized code that we've committed as binaries (or even surpass it!).
+
+## Task 7.2 - Mandelbrot
+
+Optimize the code in `mandelbrot.cpp` in terms of performance. Your task is to get as close as possible to our optimized code that we've committed as binaries (or even surpass it!).
 
 ## Deliveries
 
