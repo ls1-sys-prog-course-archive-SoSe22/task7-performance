@@ -12,12 +12,21 @@ all: libmatrix.so libmandelbrot.so
 
 clean:
 	rm -f libmatrix.so libmandelbrot.so
-
+# C++
 # libmatrix.so: matrix.cpp
 # 	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^ $(LDFLAGS)
 
 # libmandelbrot.so: mandelbrot.cpp
 # 	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^ $(LDFLAGS)
+
+# Rust
+# libmatrix.so:
+# 	$(CARGO) build --release
+# 	cp target/release/$@ .
+
+# libmandelbrot.so:
+# 	$(CARGO) build --release
+# 	cp target/release/$@ .
 
 # Usually there is no need to modify this
 check: all
